@@ -227,23 +227,14 @@
     </div>
 
     <div class="card">
-      <h3>👀 两幅图 = 同一个运动</h3>
+      <h3>👀 一张图 = 两套坐标系中的同一个运动</h3>
       <div class="frame-switch" id="lineFrameSeg" role="group" aria-label="切换直线参考系">
         <span class="small">当前观察：</span>
         <button class="btn on" type="button" data-line-frame="ground">🏞️ 地面系 A</button>
         <button class="btn" type="button" data-line-frame="cart">🚗 小车系 B</button>
       </div>
       <p class="small" id="lineFrameNote">地面系 A：小球速度 <b>v = v′ + u</b>；切换到 B 系可观察同一小球变为 v′。</p>
-      <div class="canv-row">
-        <div>
-          <div class="small" style="margin-bottom:6px;font-weight:700">🏞️ 地面参照系（A系）</div>
-          <canvas class="demo" id="lineCanvasA" width="940" height="300"></canvas>
-        </div>
-        <div>
-          <div class="small" style="margin-bottom:6px;font-weight:700">🚗 小车参照系（B系）</div>
-          <canvas class="demo" id="lineCanvasB" width="940" height="300"></canvas>
-        </div>
-      </div>
+      <canvas class="demo" id="lineCanvas" width="940" height="360"></canvas>
       <div class="legend">
         <span class="key"><span class="swatch" style="background:#5b8def"></span>小车（参照物/参照系）</span>
         <span class="key"><span class="swatch" style="background:#ff6b6b"></span>小球（被研究的物体）</span>
@@ -562,8 +553,7 @@ $id("lineFrameSeg").addEventListener("click",e=>{
 lineFxText();
 setSpeedLabel("lineU","lineUV"); setSpeedLabel("lineVp","lineVpV");
 
-const cA=$id("lineCanvasA"), ctxA=cA.getContext("2d");
-const cB=$id("lineCanvasB"), ctxB=cB.getContext("2d");
+const cA=$id("lineCanvas"), ctxA=cA.getContext("2d");
 
 const PXS=42; // px per m/s-second
 function lineWorld(t){
@@ -637,21 +627,46 @@ function drawCartFrame(ctx,W,H,t,alpha=1,clear=true){
   ctx.fillText("地面向左（-u）",10,gy+20);
    ctx.restore();
 }
-function lineLoop(t){
-  const W=cA.width,H=cA.height;
-  // reset when ball exits either frame's view
-  const world=lineWorld(t);
-  const cartBallX=W*0.25+40 + L.vp*PXS*t;
-  if(world.ballX>W-30 || world.ballX<10 || cartBallX>W-20 || cartBallX<10){ return {reset:true}; }
-  const tr=frameTransition(L,performance.now());
-  if(tr){
-    // Cross-fade complete frame drawings: positions, vectors and labels share one eased p.
-    drawGround(ctxA,W,H,t,1-tr.p,true); drawCartFrame(ctxA,W,H,t,tr.p,false);
-    drawGround(ctxB,W,H,t,1-tr.p,true); drawCartFrame(ctxB,W,H,t,tr.p,false);
-  } else {
-    // Keep the two canonical canvases as a comparison once the transition settles.
-    drawGround(ctxA,W,H,t); drawCartFrame(ctxB,W,H,t);
+function lineAxis(ctx,origin,y,color,label,unit){
+  ctx.save(); ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=2; ctx.font="bold 13px sans-serif";
+  ctx.beginPath(); ctx.moveTo(24,y); ctx.lineTo(ctx.canvas.width-20,y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ctx.canvas.width-20,y); ctx.lineTo(ctx.canvas.width-30,y-5); ctx.lineTo(ctx.canvas.width-30,y+5); ctx.fill();
+  for(let n=-3;n<=12;n++){ const x=origin+n*unit; if(x<24||x>ctx.canvas.width-22)continue; ctx.beginPath();ctx.moveTo(x,y-5);ctx.lineTo(x,y+5);ctx.stroke();ctx.fillText(String(n),x-4,y+18); }
+  ctx.fillText(label,clamp(origin+10,28,ctx.canvas.width-180),y-10); ctx.restore();
+}
+function drawLineMerged(t,now){
+  const W=cA.width,H=cA.height, ctx=ctxA, unit=42;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle="#fff"; ctx.fillRect(0,0,W,H);
+  const tr=frameTransition(L,now), from=tr?tr.from:L.anchor, to=tr?tr.to:L.anchor, p=tr?tr.p:1;
+  function state(anchor){
+    const a=anchor==="ground";
+    const aOrigin=a?150:150-L.u*unit*t;
+    const bOrigin=a?150+L.u*unit*t:150;
+    const cart=a?150+L.u*unit*t:150;
+    const ball=cart+L.vp*unit*t;
+    return {aOrigin,bOrigin,cart,ball,ballV:a?L.u+L.vp:L.vp};
   }
+  const s0=state(from), s1=state(to), mix=(k)=>s0[k]+(s1[k]-s0[k])*p;
+  const aOrigin=mix("aOrigin"), bOrigin=mix("bOrigin"), cart=mix("cart"), ball=mix("ball");
+  lineAxis(ctx,aOrigin,220,"#5b8def","A 地面系：原点 / 正方向 / m",unit);
+  lineAxis(ctx,bOrigin,310,"#36c5a6","B 小车系：原点 / 正方向 / m",unit);
+  drawCar(ctx,cart-46,220-64,92,50,"#5b8def");
+  drawBall(ctx,ball,220-20,11,"#ff6b6b");
+  const v=mix("ballV"), bBall=bOrigin+L.vp*unit*t;
+  arrow(ctx,ball-10,220-20,ball-10+v*unit,220-20,"#ffb14e",3);
+  ctx.setLineDash([4,4]);ctx.strokeStyle="rgba(145,70,255,.35)";ctx.beginPath();ctx.moveTo(ball,220);ctx.lineTo(bBall,310);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle="#36c5a6";ctx.beginPath();ctx.arc(bOrigin,310,6,0,7);ctx.fill();
+  ctx.fillStyle="#ff6b6b";ctx.beginPath();ctx.arc(bBall,310,8,0,7);ctx.fill();
+  arrow(ctx,bBall,310,bBall+L.vp*unit,310,"#36c5a6",3);
+  ctx.fillStyle="#9146ff";ctx.font="bold 14px sans-serif";ctx.fillText("A读数 v = "+fmt(L.u+L.vp,1)+" m/s",ball-55,180);
+  ctx.fillStyle="#36c5a6";ctx.fillText("B读数 v′ = "+fmt(L.vp,1)+" m/s",ball-55,270);
+  ctx.fillStyle="#8a8fa5";ctx.font="13px sans-serif";ctx.fillText("同一小球：v = v′ + u = "+fmt(L.vp,1)+" + "+fmt(L.u,1)+" = "+fmt(L.u+L.vp,1)+" m/s",24,345);
+}
+function lineLoop(t,now){
+  const W=cA.width;
+  const world=lineWorld(t);
+  if(world.ballX>W-30 || world.ballX<10){ return {reset:true}; }
+  drawLineMerged(t,now||performance.now());
   return {reset:false};
 }
 
@@ -1000,10 +1015,10 @@ function frame(now){
   // line — always render active tab; advance time only when playing
   if($id("panel-line").classList.contains("active")){
     if(L.playing){
-      const r=lineLoop(L.t);
+      const r=lineLoop(L.t,now);
       if(r.reset){ L.t=0; } else { L.t+=dt; }
     } else {
-      lineLoop(L.t);
+      lineLoop(L.t,now);
     }
   }
   // plane
