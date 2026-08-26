@@ -17,12 +17,13 @@ adela-demos 是面向小学生、老师与家长的公益开源互动课件集�
 .
 ├── index.html                    # 课件集合首页
 ├── demos/
-│   ├── galileo-lab/              # 伽利略变换实验室
-│   │   ├── index.html
-│   │   ├── app.js
-│   │   └── styles.css
-│   └── relative-velocity/        # 相对速度动画小课堂
-│       └── index.html
+│   └── galilean-transform/         # 知识点：伽利略变换
+│       ├── galileo-lab/            # demo：伽利略变换实验室
+│       │   ├── index.html
+│       │   ├── app.js
+│       │   └── styles.css
+│       └── relative-velocity/      # demo：相对速度小课堂
+│           └── index.html
 ├── docs/demo-design-guideline.md # 视觉交互规范
 ├── LICENSE
 └── .gitignore
