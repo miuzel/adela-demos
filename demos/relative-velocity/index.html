@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>相对速度 &amp; 伽利略变换 · 小学生动画小课堂</title>
+<style>
+  :root{
+    --c1:#5b8def; --c2:#ffb14e; --c3:#36c5a6; --c4:#f4739b; --c5:#9a7cf0;
+    --ink:#2b2b3a; --muted:#6b6b7e; --bg:#f6f7fc; --card:#ffffff; --line:#e7e9f2;
+    --ok:#36c5a6; --bad:#f4739b;
+    --shadow:0 8px 24px rgba(60,70,120,.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",system-ui,-apple-system,"Segoe UI",sans-serif;
+    color:var(--ink); background:var(--bg); line-height:1.65;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:20px 18px 80px;}
+
+  /* ---------- Header ---------- */
+  header.hero{
+    background:linear-gradient(120deg,#5b8def 0%,#9a7cf0 55%,#f4739b 100%);
+    color:#fff;border-radius:22px;padding:26px 30px;margin-bottom:20px;box-shadow:var(--shadow);
+  }
+  header.hero h1{margin:0 0 6px;font-size:28px;letter-spacing:.5px;}
+  header.hero p{margin:0;font-size:15px;opacity:.95;}
+  header.hero .badges{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
+  .badge{background:rgba(255,255,255,.2);padding:4px 12px;border-radius:999px;font-size:12.5px;}
+
+  /* ---------- Tabs ---------- */
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;}
+  .tab{
+    border:none;cursor:pointer;font-size:15px;font-weight:600;color:var(--muted);
+    background:#fff;padding:10px 18px;border-radius:14px;box-shadow:var(--shadow);transition:.15s;
+  }
+  .tab:hover{transform:translateY(-2px);}
+  .tab.active{background:var(--ink);color:#fff;}
+  .tab .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:middle;}
+
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade .3s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---------- Cards / sections ---------- */
+  .card{background:var(--card);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow);margin-bottom:18px;border:1px solid var(--line);}
+  .card h2{margin:0 0 4px;font-size:20px;}
+  .card h3{margin:18px 0 8px;font-size:17px;color:var(--c1);}
+  .card p{margin:6px 0;color:#44445a;}
+  .lead{font-size:15.5px;color:var(--muted);margin:0 0 12px;}
+  .small{font-size:13px;color:var(--muted);}
+
+  .grid{display:grid;gap:14px;}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+
+  .concept{
+    border-left:5px solid var(--c1);padding:14px 16px;background:#fbfbff;border-radius:10px;
+  }
+  .concept h4{margin:0 0 6px;font-size:17px;color:var(--ink);}
+  .concept h4 .emo{font-size:22px;margin-right:8px;}
+  .concept p{margin:4px 0;font-size:14.5px;}
+  .concept .formula{display:block;text-align:center;margin:8px 0 0;font-family:"SFMono-Regular",Consolas,monospace;font-weight:700;color:#9146ff;font-size:16px;}
+
+  /* formula box */
+  .fx{
+    text-align:center;padding:12px;margin:12px 0;border-radius:12px;font-family:"SFMono-Regular",Consolas,monospace;
+    font-size:20px;font-weight:700;background:linear-gradient(120deg,#f3f0ff,#fff);border:1px dashed #b79cff;
+  }
+  .fx .v{color:var(--c1);} .fx .u{color:var(--c2);} .fx .eq{color:#9146ff;}
+  .fx .sub{font-size:13px;color:var(--muted);font-weight:400;}
+
+  table.compare{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px;}
+  table.compare th,table.compare td{border:1px solid var(--line);padding:8px 10px;text-align:left;}
+  table.compare th{background:#f3f5ff;}
+
+  /* ---------- Controls ---------- */
+  .controls{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center;margin:14px 0;}
+  .ctrl{display:flex;flex-direction:column;gap:2px;}
+  .ctrl label{font-size:13px;font-weight:600;color:var(--muted);}
+  .ctrl .val{font-size:16px;font-weight:700;color:var(--c1);min-width:90px;}
+  input[type=range]{width:170px;accent-color:var(--c1);}
+  .btn{
+    border:none;cursor:pointer;background:var(--c1);color:#fff;font-weight:700;
+    padding:9px 16px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);transition:.15s;
+  }
+  .btn:hover{transform:translateY(-2px);opacity:.94;}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);}
+  .btn.orange{background:var(--c2);}
+  .btn.green{background:var(--ok);}
+  .seg{display:flex;background:#eef0f8;border-radius:12px;padding:4px;gap:4px;}
+  .seg button{border:none;background:transparent;padding:7px 14px;border-radius:9px;font-weight:600;color:var(--muted);cursor:pointer;font-size:13.5px;}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.08);}
+
+  canvas.demo{width:100%;height:auto;background:#fff;border-radius:14px;border:1px solid var(--line);display:block;}
+  .canv-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px;}
+  @media(max-width:760px){.canv-row{grid-template-columns:1fr;}}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px;}
+  .legend .key{display:inline-flex;align-items:center;gap:6px;}
+  .swatch{width:14px;height:14px;border-radius:4px;display:inline-block;}
+
+  /* answer */
+  .answer{background:#edfff7;border:1px solid #bfeede;border-radius:12px;padding:12px 16px;margin-top:12px;display:none;}
+  .answer.show{display:block;}
+  .answer .big{font-size:19px;font-weight:700;color:#11966b;}
+
+  /* quiz */
+  .q{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0;background:#fbfbff;}
+  .q .qt{font-weight:700;font-size:15.5px;margin-bottom:10px;}
+  .opt{display:block;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin:6px 0;cursor:pointer;font-size:14.5px;transition:.12s;}
+  .opt:hover{border-color:var(--c1);}
+  .opt.correct{background:#eafff5;border-color:var(--ok);color:#0f8561;}
+  .opt.wrong{background:#ffeef1;border-color:var(--bad);color:#c03a56;}
+  .opt.correct::after{content:" ✓";font-weight:700;}
+  .q .expl{display:none;font-size:13.5px;color:var(--muted);margin-top:6px;padding:8px 10px;background:#fff;border-radius:8px;border:1px dashed var(--line);}
+  .q .expl.show{display:block;}
+
+  .note{font-size:13.5px;background:#fff8ec;border:1px solid #ffe1b3;color:#8a5a00;border-radius:10px;padding:10px 12px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:26px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <h1>🚀 相对速度 &amp; 伽利略变换</h1>
+    <p>用动画和小实验，帮你搞懂「运动」「速度」「参照物」「参照系」「坐标系」和「相对速度」——最后学会解「相遇」和「追及」问题！</p>
+    <div class="badges">
+      <span class="badge">🎯 适合小学生</span>
+      <span class="badge">🖱️ 边玩边学</span>
+      <span class="badge">📐 可自定义速度与方向</span>
+      <span class="badge">🧠 关键概念一网打尽</span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-t="concept"><span class="dot" style="background:#5b8def"></span>认识概念</button>
+    <button class="tab" data-t="line"><span class="dot" style="background:#ffb14e"></span>直线·相对速度</button>
+    <button class="tab" data-t="plane"><span class="dot" style="background:#36c5a6"></span>平面·相对速度</button>
+    <button class="tab" data-t="meet"><span class="dot" style="background:#f4739b"></span>相遇与追及</button>
+    <button class="tab" data-t="quiz"><span class="dot" style="background:#9a7cf0"></span>小测验</button>
+  </nav>
+
+  <!-- ============ CONCEPT TAB ============ -->
+  <section class="panel active" id="panel-concept">
+    <div class="card">
+      <h2>🌟 先认识几个好朋友</h2>
+      <p class="lead">下面这几个词，是理解运动的「地基」。每个都配了小例子，你一看就懂。</p>
+      <div class="grid g3">
+        <div class="concept" style="border-color:#5b8def">
+          <h4><span class="emo">🏃</span>运动 Motion</h4>
+          <p><b>物体位置随时间发生变化</b>，就叫运动。如果位置一直不变，就是「静止」。</p>
+          <p class="small">⚠️ 注意：一个物体是运动还是静止，要看拿谁当参照！</p>
+        </div>
+        <div class="concept" style="border-color:#ffb14e">
+          <h4><span class="emo">⚡</span>速度 Velocity</h4>
+          <p>速度描述<b>运动得快慢和方向</b>，是「单位时间内位置变了多少」。</p>
+          <p class="formula">速度 = 位置变化 ÷ 时间</p>
+          <p class="small">速度有大小（快慢），还有方向（朝哪边）。</p>
+        </div>
+        <div class="concept" style="border-color:#36c5a6">
+          <h4><span class="emo">🧱</span>参照物 Reference object</h4>
+          <p>判断物体动不动，<b>先选一个「标准物体」</b>，它就叫做参照物。</p>
+          <p class="small">同样是坐火车，看窗外树；以树为参照，你在飞快移动；以座位为参照，你是静止的。</p>
+        </div>
+        <div class="concept" style="border-color:#f4739b">
+          <h4><span class="emo">🗺️</span>参照系 Reference frame</h4>
+          <p><b>参照物 + 坐标系 = 参照系。</b>就是「从谁的视角来看这个运动」。</p>
+          <p class="small">地面有地面的参照系，火车有火车的参照系。同一个运动，在不同参照系里看到的「速度值」可能不一样。</p>
+        </div>
+        <div class="concept" style="border-color:#9a7cf0">
+          <h4><span class="emo">📏</span>坐标系 Coordinate system</h4>
+          <p>在参照物上画一把「带方向的尺子」和「原点」，用数字标出位置，就是坐标系。</p>
+          <p class="small">比如以出发点为 0，往右为正，往左为负。</p>
+        </div>
+        <div class="concept" style="border-color:#ff6f61">
+          <h4><span class="emo">🔄</span>相对速度 Relative velocity</h4>
+          <p>把物体在「A参照系」里的速度，<b>换算成「B参照系」里的速度</b>——这就是相对速度，靠伽利略变换！</p>
+          <p class="formula">v<sub>A系</sub> = v<sub>B系</sub> + u<sub>(B相对A)</sub></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧭 一个生活小例子</h2>
+      <p>你坐在匀速前进的火车里（车厢是参照系 B），在车厢里向前走，速度是 v′。火车相对地面（参照系 A）的速度是 u。</p>
+      <table class="compare">
+        <thead><tr><th>从哪个参照系看</th><th>你的速度</th><th>为什么</th></tr></thead>
+        <tbody>
+          <tr><td>🚂 从车厢（B系）看</td><td><b>v′</b></td><td>火车没动，你只是在车厢里往前走的那个速度。</td></tr>
+          <tr><td>🏞️ 从地面（A系）看</td><td><b>v′ + u</b></td><td>火车本来就在往前开 u，再加上你走的 v′，所以更快。</td></tr>
+          <tr><td>📐 伽利略变换</td><td><b>v = v′ + u</b></td><td>把 B 系速度换算成 A 系速度，就是把「火车的快慢」u 加进去。</td></tr>
+        </tbody>
+      </table>
+      <p class="note">💡 伽利略变换只在速度远小于光速的日常生活里准确；光速附近要用爱因斯坦的相对论。这些我们以后再学。</p>
+    </div>
+
+    <div class="card">
+      <h3>❗ 最重要的一句话</h3>
+      <div class="fx"><span class="v">v<sub>A系</sub></span> <span class="eq">=</span> <span class="u">v<sub>B系</sub></span> <span class="eq">+</span> <span class="u">u<sub>B相对A</sub></span><br><span class="sub">把「B系里看到的速度」加上「B相对A的速度」，就得到「A系里看到的速度」</span></div>
+      <p class="small">👇 点上面的「直线·相对速度」，自己能调速度、亲眼看看上面这个公式是怎么成立的。</p>
+    </div>
+  </section>
+
+  <!-- ============ LINE TAB ============ -->
+  <section class="panel" id="panel-line">
+    <div class="card">
+      <h2>📏 直线上的相对速度</h2>
+      <p class="lead">这里有一辆<b>小车（🚗）</b>，它可以当参照系；地上还有一颗<b>小球（⚽）</b>。你拖动滑杆，看这颗球在「地面」和「小车」两个参照系里分别是多快。</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>小车速度 u（相对地面，向右）</label>
+          <input type="range" id="lineU" min="-2" max="2" step="0.2" value="1">
+          <span class="val" id="lineUV">1.0 m/s</span>
+        </div>
+        <div class="ctrl">
+          <label>小球在小车里速度 v′（向右为正）</label>
+          <input type="range" id="lineVp" min="-2" max="2" step="0.2" value="1.5">
+          <span class="val" id="lineVpV">1.5 m/s</span>
+        </div>
+        <button class="btn green" id="linePlay">⏸ 暂停</button>
+        <button class="btn ghost" id="lineReset">↺ 重置</button>
+      </div>
+      <p class="small">结果会自动算出来：在地面系里，小球的绝对速度 <b>v = v′ + u</b>。</p>
+      <div class="fx" id="lineFx"><span class="v">v = 2.5 m/s</span></div>
+    </div>
+
+    <div class="card">
+      <h3>👀 两幅图 = 同一个运动</h3>
+      <div class="canv-row">
+        <div>
+          <div class="small" style="margin-bottom:6px;font-weight:700">🏞️ 地面参照系（A系）</div>
+          <canvas class="demo" id="lineCanvasA" width="940" height="300"></canvas>
+        </div>
+        <div>
+          <div class="small" style="margin-bottom:6px;font-weight:700">🚗 小车参照系（B系）</div>
+          <canvas class="demo" id="lineCanvasB" width="940" height="300"></canvas>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="key"><span class="swatch" style="background:#5b8def"></span>小车（参照物/参照系）</span>
+        <span class="key"><span class="swatch" style="background:#ff6b6b"></span>小球（被研究的物体）</span>
+        <span class="key"><span class="swatch" style="background:#ffb14e"></span>速度方向箭头（长度=大小）</span>
+      </div>
+      <p class="note">🌍 注意看：<b>一样是这颗小球、一样的每秒位置变化</b>，但从地面看它每秒往前走得更多（因为车也在往前走），从车上看它就慢一些。两个数之间正好差一个小车的速度 u。</p>
+    </div>
+  </section>
+
+  <!-- ============ PLANE TAB ============ -->
+  <section class="panel" id="panel-plane">
+    <div class="card">
+      <h2>🗺️ 平面上的相对速度（矢量加法）</h2>
+      <p class="lead">这次换 2D 视角：小车向右开（速度 u），小球在小车里被「斜着扔」（速度 v′，有前后和上下两个分量）。在地面系里，球的速度是两个速度<b>矢量相合</b>的结果。</p>
+      <div class="controls">
+        <div class="ctrl">
+          <label>小车速度 u（向右）</label>
+          <input type="range" id="plU" min="-2" max="3" step="0.2" value="1.5">
+          <span class="val" id="plUV">1.5 m/s</span>
+        </div>
+        <div class="ctrl">
+          <label>球在小车里：水平 v′<sub>x</sub></label>
+          <input type="range" id="plVx" min="-2" max="2" step="0.2" value="1.2">
+          <span class="val" id="plVxV">1.2 m/s</span>
+        </div>
+        <div class="ctrl">
+          <label>球在小车里：竖直 v′<sub>y</sub></label>
+          <input type="range" id="plVy" min="-2" max="2" step="0.2" value="1.6">
+          <span class="val" id="plVyV">1.6 m/s</span>
+        </div>
+        <button class="btn green" id="plPlay">⏸ 暂停</button>
+        <button class="btn ghost" id="plReset">↺ 重置</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🎬 两个坐标系叠加：同一个运动，两套坐标</h3>
+      <p class="small">这里把<b>地面系（蓝色）</b>和<b>小车系（绿色）</b>的直角坐标系<b>叠在同一张图</b>上。小球在动，你可以在两个坐标系里读出它各自的坐标——两套数字不一样！下面还能「锚定」其中一个坐标系，让另一个坐标系滑动。</p>
+      <div class="controls" style="margin:10px 0">
+        <div class="ctrl" style="flex-direction:row;align-items:center;gap:8px">
+          <label style="font-size:14px">锚定坐标系：</label>
+          <div class="seg" id="plAnchor">
+            <button class="on" data-a="ground">🏞️ 地面（A 固定，小车动）</button>
+            <button data-a="car">🚗 小车（B 固定，地面动）</button>
+          </div>
+        </div>
+      </div>
+      <canvas class="demo" id="plCanvasOverlay" width="940" height="500"></canvas>
+      <div class="legend">
+        <span class="key"><span class="swatch" style="background:#5b8def"></span>地面系 A 坐标轴/网格</span>
+        <span class="key"><span class="swatch" style="background:#36c5a6"></span>小车系 B 坐标轴/网格</span>
+        <span class="key"><span class="swatch" style="background:#ff6b6b"></span>小球</span>
+        <span class="key"><span class="swatch" style="background:#ffb14e"></span>小车（参照物）</span>
+      </div>
+      <p id="plOverlayReadout" style="margin-top:10px;font-family:'SFMono-Regular',Consolas,monospace;font-size:15px;color:#2b2b3a"></p>
+    </div>
+
+    <div class="card">
+      <h3>🧮 矢量三角形：U + V′ = V</h3>
+      <p class="small">把「小车的速度 U」和「球在小车里的速度 V′」头尾相接，从起点连到终点的箭头，就是地面系里的速度 V。大小和方向都由它决定。</p>
+      <canvas class="demo" id="plCanvasVec" width="940" height="240"></canvas>
+      <div class="fx">
+        <span class="u">u<sub>x</sub></span> <span class="eq">+</span> <span class="v">v′<sub>x</sub></span>
+        <span class="eq">=</span> <span class="v">v<sub>x</sub></span> &nbsp;&nbsp;
+        <span class="u">u<sub>y</sub></span> <span class="eq">+</span> <span class="v">v′<sub>y</sub></span>
+        <span class="eq">=</span> <span class="v">v<sub>y</sub></span>
+      </div>
+      <p class="small">因为小车只向右开，所以 u 只有横轴分量 u<sub>x</sub>，竖直分量 u<sub>y</sub> = 0。于是地面系里：<b>横轴 v<sub>x</sub> = v′<sub>x</sub> + u</b>，<b>竖轴 v<sub>y</sub> = v′<sub>y</sub></b>。这就是平面上的伽利略变换。</p>
+    </div>
+  </section>
+
+  <!-- ============ MEET TAB ============ -->
+  <section class="panel" id="panel-meet">
+    <div class="card">
+      <h2>🤝 相遇与追及（应用题来啦）</h2>
+      <p class="lead">学了相对速度，就能秒解相遇、追及问题。诀窍只有一句话：<b>把其中一个物体当成「静止的参照物」，另一个物体就只以「相对速度」靠近它。</b></p>
+      <div class="seg" id="meetSeg" style="margin:10px 0 4px">
+        <button class="on" data-s="meet">🤝 相遇（相向而行）</button>
+        <button data-s="chase">🏃 追及（同向，一个追一个）</button>
+      </div>
+      <div class="controls">
+        <div class="ctrl">
+          <label>A 的速度 v<sub>A</sub>（向右）</label>
+          <input type="range" id="mVA" min="0" max="4" step="0.2" value="2">
+          <span class="val" id="mVAV">2.0</span>
+        </div>
+        <div class="ctrl">
+          <label>B 的速度 v<sub>B</sub></label>
+          <input type="range" id="mVB" min="0" max="4" step="0.2" value="1.5">
+          <span class="val" id="mVBV">1.5</span>
+        </div>
+        <div class="ctrl">
+          <label>初始距离 d（米）</label>
+          <input type="range" id="mD" min="2" max="12" step="0.5" value="7">
+          <span class="val" id="mDV">7</span>
+        </div>
+        <button class="btn green" id="mPlay">⏸ 暂停</button>
+        <button class="btn ghost" id="mReset">↺ 重置</button>
+      </div>
+      <p class="note" id="meetWarn" style="display:none;background:#ffeef1;border-color:#f7b;color:#b03a56">⚠️ 追及问题里，必须 A 比 B 快才行（v<sub>A</sub> &gt; v<sub>B</sub>），否则永远追不上。</p>
+    </div>
+
+    <div class="card">
+      <h3>🎬 动画看看</h3>
+      <p class="small">先选一个「参照系视角」，再点播放。切换视角能看到：<b>换成以某一个物体为参照，它就成了静止的，另一个物体就只是以「相对速度」匀速靠近它。</b></p>
+      <div class="seg" id="refSeg" style="margin:8px 0">
+        <button class="on" data-r="ground">🏞️ 地面参照系</button>
+        <button data-r="A">以 A 为参照（A 静止）</button>
+        <button data-r="B">以 B 为参照（B 静止）</button>
+      </div>
+      <canvas class="demo" id="mCanvas" width="940" height="330"></canvas>
+      <p class="note" id="mRefNote" style="margin-top:10px"></p>
+      <p class="small" id="mCaption">点「重置」或调整滑杆重新开始 —— 两球相遇时，动画会停下并标出相遇点。</p>
+    </div>
+
+    <div class="card">
+      <h3>🧠 一般解法（超通用！）</h3>
+      <div class="grid g2">
+        <div>
+          <h3 style="margin-top:0">📐 书本公式</h3>
+          <p class="small">设两者初始相距 d。若二者方向相反（相遇），或同向但 A 去追 B：</p>
+          <div class="fx" id="meetFormula">t = d ÷ (v<sub>A</sub> + v<sub>B</sub>)</div>
+          <p class="small">相遇时：A、B 共同「吃掉」这段距离，所以除以 <b>速度和</b>。</p>
+          <div class="fx" id="chaseFormula" style="display:none">t = d ÷ (v<sub>A</sub> − v<sub>B</sub>)</div>
+          <p class="small" id="chaseNote" style="display:none">追及时：A 每秒比 B 多走 <b>v<sub>A</sub> − v<sub>B</sub></b>，就叫相对速度，用它来「缩小差距」。</p>
+        </div>
+        <div>
+          <h3 style="margin-top:0">💡 相对速度视角（最聪明）</h3>
+          <p class="small"><b>把 B 当作静止参照物。</b>那么初始时 A 离 B 的距离还是 d，而现在 B 静止，A 就以「相对速度 v<sub>相对</sub>」地靠近 B。于是：</p>
+          <div class="fx">t = d ÷ v<sub>相对</sub></div>
+          <p class="small">其中 <b>v<sub>相对</sub> = v<sub>A</sub> + v<sub>B</sub></b>（相向，方向相反所以相加），<b>或 v<sub>相对</sub> = v<sub>A</sub> − v<sub>B</sub></b>（同向追及，方向相同所以相减）。</p>
+          <p class="note">🧪 试着切到上面的<b>「以 A 为参照」或「以 B 为参照」</b>视角——你会看到其中一个静止不动，另一个以相对速度匀速靠近，结果和地面系一样，但更好懂！</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ TAB ============ -->
+  <section class="panel" id="panel-quiz">
+    <div class="card">
+      <h2>🧩 小测验，看看你学会没</h2>
+      <p class="lead">点一下你认为正确的选项。答对会变绿，答错变红，并给出解释。</p>
+
+      <div class="q" data-q="q1">
+        <div class="qt">1️⃣ 判断物体是运动还是静止，必须先有一个（  ）。</div>
+        <div class="opt" data-ok="0">A. 钟表</div>
+        <div class="opt" data-ok="1">B. 参照物</div>
+        <div class="opt" data-ok="0">C. 尺子</div>
+        <div class="expl">要找参照物才行。同一个物体，换一个参照物，运动状态可能完全不同。</div>
+      </div>
+
+      <div class="q" data-q="q2">
+        <div class="qt">2️⃣ 火车以 10 m/s 前进。你在车厢里以 2 m/s 向前走，从地面看你是（  ）。</div>
+        <div class="opt" data-ok="0">A. 2 m/s</div>
+        <div class="opt" data-ok="1">B. 12 m/s</div>
+        <div class="opt" data-ok="0">C. 8 m/s</div>
+        <div class="expl">地面速度 v = 火车速度 + 你的速度 = 10 + 2 = 12 m/s。这就是伽利略变换。</div>
+      </div>
+
+      <div class="q" data-q="q3">
+        <div class="qt">3️⃣ 甲从 A 地、乙从 B 地相向而行，AB 相距 100 m。甲 4 m/s，乙 6 m/s，多久相遇？（  ）</div>
+        <div class="opt" data-ok="0">A. 20 s</div>
+        <div class="opt" data-ok="1">B. 10 s</div>
+        <div class="opt" data-ok="0">C. 25 s</div>
+        <div class="expl">相向而行，相对速度 = 4 + 6 = 10 m/s。时间 = 100 ÷ 10 = 10 s。</div>
+      </div>
+
+      <div class="q" data-q="q4">
+        <div class="qt">4️⃣ 甲在乙前面 40 m，甲 3 m/s，乙 5 m/s 同向前进（乙追甲）。乙追上甲要多久？（  ）</div>
+        <div class="opt" data-ok="1">A. 20 s</div>
+        <div class="opt" data-ok="0">B. 8 s</div>
+        <div class="opt" data-ok="0">C. 5 s</div>
+        <div class="expl">同向追及，相对速度 = 5 − 3 = 2 m/s。时间 = 40 ÷ 2 = 20 s。</div>
+      </div>
+
+      <div class="q" data-q="q5">
+        <div class="qt">5️⃣ 下面哪个说法「正确」？（  ）</div>
+        <div class="opt" data-ok="1">A. 同一个运动，在不同参照系里看到的速度值一定相同</div>
+        <div class="opt" data-ok="0">B. 伽利略变换能把一个参照系里的速度换算成另一个参照系里的速度</div>
+        <div class="opt" data-ok="0">C. 速度只表示快慢，和方向无关</div>
+        <div class="expl">B 是对的——伽利略变换就是干这个的。A 错，速度值可能不同但可换算；C 错，速度既有大小又有方向。</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>🎓 相对速度 &amp; 伽利略变换动画小课堂 · 愿你把「运动」看得更清楚</footer>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   helpers
+============================================================ */
+function $id(id){ return document.getElementById(id); }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function fmt(x,d){ return (Math.round(x*10)/10).toFixed(d); }
+
+function setSpeedLabel(rid,label){ 
+  // hook range input to a label
+  const r=$id(rid); const l=$id(label);
+  function upd(){
+    const v=parseFloat(r.value);
+    l.textContent = (r.id==="mVA"? fmt(v,1): fmt(v,1)) + " m/s";
+  }
+  r.addEventListener("input",upd); upd();
+}
+function onInput(rid,fn){ $id(rid).addEventListener("input",fn); }
+
+/* velocity arrow */
+function rrect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+function arrow(ctx,x0,y0,x1,y1,color,width){
+  const dx=x1-x0, dy=y1-y0;
+  const len=Math.hypot(dx,dy);
+  if(len<1){return;}
+  const ang=Math.atan2(dy,dx);
+  const ah=Math.min(10, len*0.4);
+  ctx.save();
+  ctx.strokeStyle=color; ctx.lineWidth=width||3; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x1-ah*Math.cos(ang-0.45), y1-ah*Math.sin(ang-0.45));
+  ctx.lineTo(x1-ah*Math.cos(ang+0.45), y1-ah*Math.sin(ang+0.45));
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function drawCar(ctx,x,y,w,h,color){
+  ctx.save();
+  ctx.fillStyle=color||"#5b8def";
+  // body
+  rrect(ctx,x,y,w,h,8); ctx.fill();
+  // cabin
+  rrect(ctx,x+w*0.28,y-h*0.5,w*0.44,h*0.5,6); ctx.fill();
+  ctx.fillStyle="#fff"; ctx.fillRect(x+w*0.32,y-h*0.42,w*0.1,h*0.2); ctx.fillRect(x+w*0.56,y-h*0.42,w*0.1,h*0.2);
+  // wheels
+  ctx.fillStyle="#333";
+  ctx.beginPath(); ctx.arc(x+w*0.22,y+h,6,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+w*0.78,y+h,6,0,7); ctx.fill();
+  ctx.restore();
+}
+function drawBall(ctx,x,y,r,color){
+  ctx.save();
+  ctx.fillStyle=color||"#ff6b6b";
+  ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+  ctx.strokeStyle="rgba(0,0,0,.2)"; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.strokeStyle="rgba(255,255,255,.7)"; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(x-r*0.2,y-r*0.25,r*0.4,0,7); ctx.stroke();
+  ctx.restore();
+}
+
+/* ============================================================
+   TABS
+============================================================ */
+const tabs=document.querySelectorAll(".tab");
+const panels=document.querySelectorAll(".panel");
+tabs.forEach(t=>{
+  t.addEventListener("click",()=>{
+    tabs.forEach(x=>x.classList.remove("active"));
+    panels.forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    $id("panel-"+t.dataset.t).classList.add("active");
+  });
+});
+
+/* ============================================================
+   LINE DEMO
+============================================================ */
+const L={u:1,vp:1.5,t:0,playing:true};
+function lineVals(){
+  return {u:$id("lineU").valueAsNumber, vp:$id("lineVp").valueAsNumber};
+}
+function lineFxText(){
+  const {u,vp}=lineVals();
+  $id("lineFx").innerHTML='<span class="v">v = v′ + u = '+fmt(vp,1)+' + '+fmt(u,1)+' = '+fmt(vp+u,1)+' m/s</span>';
+}
+onInput("lineU",()=>{L.u=$id("lineU").valueAsNumber; L.t=0; lineFxText();});
+onInput("lineVp",()=>{L.vp=$id("lineVp").valueAsNumber; L.t=0; lineFxText();});
+$id("linePlay").addEventListener("click",()=>{L.playing=!L.playing; $id("linePlay").textContent=L.playing?"⏸ 暂停":"▶ 播放";});
+$id("lineReset").addEventListener("click",()=>{L.t=0;});
+// initial fx
+lineFxText();
+setSpeedLabel("lineU","lineUV"); setSpeedLabel("lineVp","lineVpV");
+
+const cA=$id("lineCanvasA"), ctxA=cA.getContext("2d");
+const cB=$id("lineCanvasB"), ctxB=cB.getContext("2d");
+
+const PXS=42; // px per m/s-second
+function lineWorld(t){
+  // positions in px relative to left margin
+  const margin=80;
+  const u=L.u, vp=L.vp;
+  // In ground frame: cart at u*t, ball at (u+vp)*t
+  const cartX=margin + u*PXS*t;
+  const ballX=margin + (u+vp)*PXS*t;
+  return {cartX,ballX,ballVpx:(u+vp)*PXS, cartVpx:u*PXS, vpx:vp*PXS};
+}
+function drawGround(ctx,W,H,t){
+  ctx.clearRect(0,0,W,H);
+  // ground strip
+  const gy=H*0.68;
+  ctx.fillStyle="#eef3ff";
+  ctx.fillRect(0,gy,W,H-gy);
+  ctx.fillStyle="#dfe7ff";
+  for(let x=0;x<W;x+=24){ ctx.fillRect(x,gy+4,12,3); }
+  const {cartX,ballX,ballVpx,cartVpx}=lineWorld(t);
+  // labels
+  ctx.fillStyle="#8a8fa5"; ctx.font="13px sans-serif"; ctx.textAlign="left";
+  ctx.fillText("🏞️ 地面参照系（A系）—— 小车在移动",10,20);
+  ctx.fillText("小球在地面系的速度 v = v′ + u",10,40);
+  // cart
+  drawCar(ctx,cartX,gy-64,92,50,"#5b8def");
+  // velocity vector under cart (small)
+  arrow(ctx,cartX+46,gy+14,cartX+46+cartVpx,gy+14,"#5b8def",3);
+  // ball
+  drawBall(ctx,ballX,gy-20,11,"#ff6b6b");
+  // ball velocity vector
+  arrow(ctx,ballX-10,gy-20,ballX-10+ballVpx,gy-20,"#ffb14e",3);
+  // speed text
+  ctx.fillStyle="#ffb14e"; ctx.font="bold 14px sans-serif"; ctx.textAlign="left";
+  ctx.fillText("|V| = "+fmt((L.u+L.vp),1)+" m/s",ballX-10,gy-40);
+  // motion hint arrows
+  const startX=cartX;
+  // small note
+}
+function drawCartFrame(ctx,W,H,t){
+  ctx.clearRect(0,0,W,H);
+  // In cart frame, cart is fixed; ground moves left at -u; ball at vp
+  const gy=H*0.68;
+  // ground strip moves
+  const offset=-L.u*PXS*t;
+  ctx.fillStyle="#eef3ff";
+  ctx.fillRect(0,gy,W,H-gy);
+  ctx.save();
+  ctx.beginPath(); ctx.rect(0,gy,W,H-gy); ctx.clip();
+  ctx.translate(offset,0);
+  ctx.fillStyle="#dfe7ff";
+  for(let x=-PXS*4;x<W+offset+200;x+=24){ ctx.fillRect(x,gy+4,12,3); }
+  ctx.restore();
+  // cart fixed at center-left
+  const cx=W*0.25;
+  ctx.fillStyle="#8a8fa5"; ctx.font="13px sans-serif"; ctx.textAlign="left";
+  ctx.fillText("🚗 小车参照系（B系）—— 小车静止，地面在后退",10,20);
+  ctx.fillText("小球在小车里速度 v′（这才是它「真实」的快慢）",10,40);
+  drawCar(ctx,cx,gy-64,92,50,"#5b8def");
+  // ball in cart coords
+  const bx=cx+40 + L.vp*PXS*t;
+  arrow(ctx,cx+46,gy+14,cx+46+L.u*PXS,gy+14,"#c6cbd6",3); // ground speed arrow (relative)
+  drawBall(ctx,bx,gy-20,11,"#ff6b6b");
+  arrow(ctx,bx-10,gy-20,bx-10+L.vp*PXS,gy-20,"#36c5a6",3);
+  ctx.fillStyle="#36c5a6"; ctx.font="bold 14px sans-serif";
+  ctx.fillText("|V′| = "+fmt(L.vp,1)+" m/s",bx-10,gy-40);
+  ctx.fillStyle="#c6cbd6";
+  ctx.fillText("地面向左（-u）",10,gy+20);
+}
+function lineLoop(t){
+  const W=cA.width,H=cA.height;
+  // reset when ball exits either frame's view
+  const world=lineWorld(t);
+  const cartBallX=W*0.25+40 + L.vp*PXS*t;
+  if(world.ballX>W-30 || world.ballX<10 || cartBallX>W-20 || cartBallX<10){ return {reset:true}; }
+  drawGround(ctxA,W,H,t);
+  drawCartFrame(ctxB,W,H,t);
+  return {reset:false};
+}
+
+/* ============================================================
+   PLANE DEMO
+============================================================ */
+const P={u:1.5,vx:1.2,vy:1.6,t:0,playing:true,anchor:"ground"};
+function plVal(){ return {u:$id("plU").valueAsNumber, vx:$id("plVx").valueAsNumber, vy:$id("plVy").valueAsNumber}; }
+onInput("plU",()=>{P.u=$id("plU").valueAsNumber;P.t=0;});
+onInput("plVx",()=>{P.vx=$id("plVx").valueAsNumber;P.t=0;});
+onInput("plVy",()=>{P.vy=$id("plVy").valueAsNumber;P.t=0;});
+$id("plPlay").addEventListener("click",()=>{P.playing=!P.playing; $id("plPlay").textContent=P.playing?"⏸ 暂停":"▶ 播放";});
+$id("plReset").addEventListener("click",()=>{P.t=0;});
+$id("plAnchor").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  P.anchor=b.dataset.a;
+  $id("plAnchor").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+  P.t=0;
+});
+function plLabels(){
+  const {u,vx,vy}=plVal();
+  $id("plUV").textContent=fmt(u,1)+" m/s";
+  $id("plVxV").textContent=fmt(vx,1)+" m/s";
+  $id("plVyV").textContent=fmt(vy,1)+" m/s";
+}
+["plU","plVx","plVy"].forEach(id=>$id(id).addEventListener("input",plLabels));
+plLabels();
+
+const pcO=$id("plCanvasOverlay").getContext("2d");
+const pcV=$id("plCanvasVec").getContext("2d");
+
+const PUNIT=30; // px per meter
+// Draw ONE colored coordinate system (light mesh + strong axes) with its origin at (ox,oy).
+function drawColoredGrid(ctx,W,H,ox,oy,unit,color,tag,alpha){
+  ctx.save();
+  // light mesh that always fills the canvas (offset by origin)
+  ctx.strokeStyle=color; ctx.globalAlpha=alpha; ctx.lineWidth=1;
+  const sx=((ox%unit)+unit)%unit, sy=((oy%unit)+unit)%unit;
+  for(let x=sx;x<W;x+=unit){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=sy;y<H;y+=unit){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  // strong axes through the origin (only when they cross the visible canvas)
+  ctx.globalAlpha=1; ctx.strokeStyle=color; ctx.lineWidth=2.5;
+  if(oy>=0 && oy<=H){ ctx.beginPath(); ctx.moveTo(0,oy); ctx.lineTo(W,oy); ctx.stroke(); }
+  if(ox>=0 && ox<=W){ ctx.beginPath(); ctx.moveTo(ox,0); ctx.lineTo(ox,H); ctx.stroke(); }
+  // axis arrow heads
+  ctx.fillStyle=color;
+  if(oy>=0 && oy<=H){ ctx.beginPath(); ctx.moveTo(W-8,oy-5); ctx.lineTo(W,oy); ctx.lineTo(W-8,oy+5); ctx.fill(); }
+  if(ox>=0 && ox<=W){ ctx.beginPath(); ctx.moveTo(ox-5,8); ctx.lineTo(ox,0); ctx.lineTo(ox+5,8); ctx.fill(); }
+  ctx.restore();
+  // origin dot + tag
+  ctx.fillStyle=color;
+  ctx.beginPath(); ctx.arc(ox,oy,5,0,7); ctx.fill();
+  ctx.font="bold 13px sans-serif"; ctx.textAlign="left";
+  ctx.fillText(tag+" (0,0)", ox+10, oy-9);
+}
+
+function drawOverlay(t){
+  const W=pcO.canvas.width, H=pcO.canvas.height;
+  const ctx=pcO; ctx.clearRect(0,0,W,H);
+  const {u,vx,vy}=plVal();
+  const unit=PUNIT, ox=W*0.40, oy=H-96;
+
+  // frame origins in canvas px (motion is along x, so y stays at oy)
+  let oxA,oxB;
+  if(P.anchor==="ground"){ oxA=ox; oxB=ox+u*unit*t; }   // car slides right
+  else{ oxB=ox; oxA=ox-u*unit*t; }                       // ground slides left
+
+  // ball position, drawn in the STATIC (anchored) frame
+  const bx = P.anchor==="ground" ? oxA+(vx+u)*unit*t : oxB+vx*unit*t;
+  const by = oy - vy*unit*t;
+
+  // draw the two colored grids overlaid
+  if(P.anchor==="ground"){
+    drawColoredGrid(ctx,W,H,oxA,oy,unit,"#5b8def","地面系 A",0.22);
+    drawColoredGrid(ctx,W,H,oxB,oy,unit,"#36c5a6","小车系 B",0.15);
+  } else {
+    drawColoredGrid(ctx,W,H,oxB,oy,unit,"#36c5a6","小车系 B",0.22);
+    drawColoredGrid(ctx,W,H,oxA,oy,unit,"#5b8def","地面系 A",0.15);
+  }
+
+  // trajectory in the static frame: line from its origin to the ball
+  const sox = P.anchor==="ground" ? oxA : oxB;
+  ctx.strokeStyle="rgba(255,177,78,0.95)"; ctx.lineWidth=3; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(sox,oy); ctx.lineTo(bx,by); ctx.stroke();
+
+  // reference object: the small car sits at the B (car) frame origin
+  drawCar(ctx, oxB-48, oy-54, 96, 50, "#ffb14e");
+
+  // ball + its velocity vector (in the static frame)
+  drawBall(ctx,bx,by,10,"#ff6b6b");
+  const svx = P.anchor==="ground" ? vx+u : vx;
+  arrow(ctx,bx,by,bx+svx*unit*1.5,by-vy*unit*1.5,"#9146ff",4);
+
+  // live coordinate readout for both systems
+  const xA=(vx+u)*t, yA=vy*t, xB=vx*t, yB=vy*t;
+  const aTxt='<span style="color:#5b8def;font-weight:700">地面系 A ('+fmt(xA,1)+', '+fmt(yA,1)+') m</span>';
+  const bTxt='<span style="color:#36c5a6;font-weight:700">小车系 B ('+fmt(xB,1)+', '+fmt(yB,1)+') m</span>';
+  $id("plOverlayReadout").innerHTML = P.anchor==="ground"
+    ? "此刻小球：A系 "+aTxt+" ｜ B系 "+bTxt
+    : "此刻小球：B系 "+bTxt+" ｜ A系 "+aTxt;
+}
+function drawVec(){
+  const W=$id("plCanvasVec").width, H=$id("plCanvasVec").height;
+  const ctx=pcV; ctx.clearRect(0,0,W,H);
+  const {u,vx,vy}=plVal();
+  const ox=180, oy=H*0.62, sc=16;
+  // origin + labels
+  ctx.fillStyle="#8a8fa5"; ctx.font="13px sans-serif"; ctx.textAlign="center";
+  ctx.fillText("矢量三角形：U + V′ = V（头尾相接）",W/2,20);
+  // U arrow
+  const ux=ox+u*sc*2;
+  arrow(ctx,ox,oy,ux,oy,"#5b8def",4);
+  ctx.fillStyle="#5b8def"; ctx.font="bold 14px sans-serif"; ctx.textAlign="center";
+  ctx.fillText("U=("+fmt(u,1)+",0)",(ox+ux)/2,oy-10);
+  // V' arrow from tip of U
+  const vx2=ux+vx*sc*2, vy2=oy-vy*sc*2;
+  arrow(ctx,ux,oy,vx2,vy2,"#36c5a6",4);
+  ctx.fillStyle="#36c5a6";
+  ctx.fillText("V′=("+fmt(vx,1)+","+fmt(vy,1)+")",(ux+vx2)/2,(oy+vy2)/2-10);
+  // resultant V
+  arrow(ctx,ox,oy,vx2,vy2,"#f4739b",5);
+  ctx.fillStyle="#f4739b";
+  ctx.fillText("V=("+fmt(vx+u,1)+","+fmt(vy,1)+")",(ox+vx2)/2+20,(oy+vy2)/2-24);
+  // formula
+  ctx.fillStyle="#9146ff"; ctx.font="bold 16px sans-serif"; ctx.textAlign="left";
+  ctx.fillText("U   +   V′   =   V",ox,oy+50);
+  ctx.textAlign="center";
+}
+function planeLoop(t){
+  drawOverlay(t);
+  drawVec();
+  // reset when the ball leaves the canvas (uses the static-frame velocity)
+  const {u,vx,vy}=plVal();
+  const W=pcO.canvas.width, H=pcO.canvas.height;
+  const ox=W*0.40, oy=H-96;
+  const bx = P.anchor==="ground" ? ox+(vx+u)*PUNIT*t : ox+vx*PUNIT*t;
+  const by = oy-vy*PUNIT*t;
+  if(bx>W+60||bx<-60||by>H+80||by<-80){ return {reset:true}; }
+  return {reset:false};
+}
+
+/* ============================================================
+   MEET DEMO
+============================================================ */
+const M={mode:"meet",vA:2,vB:1.5,d:7,t:0,playing:true,meetT:null,meetX:null,refMode:"ground"};
+$id("meetSeg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  M.mode=b.dataset.s;
+  $id("meetSeg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+  updateMeetFormula(); M.reset(); updateRefNote();
+});
+$id("mPlay").addEventListener("click",()=>{M.playing=!M.playing; $id("mPlay").textContent=M.playing?"⏸ 暂停":"▶ 播放";});
+function Mlabel(){
+  $id("mVAV").textContent=fmt(M.vA,1);
+  $id("mVBV").textContent=fmt(M.vB,1);
+  $id("mDV").textContent=fmt(M.d,1);
+}
+["mVA","mVB","mD"].forEach(id=>$id(id).addEventListener("input",Mlabel));
+Mlabel();
+M.reset=function(){
+  M.t=0; M.playing=true; $id("mPlay").textContent="⏸ 暂停";
+  updateMeetFormula();
+};
+
+function updateMeetFormula(){
+  const warn=$id("meetWarn");
+  const meetF=$id("meetFormula"), chF=$id("chaseFormula"), chN=$id("chaseNote");
+  const vRel = M.mode==="meet" ? M.vA+M.vB : M.vA-M.vB;
+  // warn for chase if not faster
+  if(M.mode==="chase" && M.vA<=M.vB){
+    warn.style.display="block";
+    meetF.style.display="none"; chF.style.display="none"; chN.style.display="none";
+    $id("mCaption").innerHTML="⚠️ A 必须比 B 快才能追上（需要 v<sub>A</sub> &gt; v<sub>B</sub>）。请把 A 调快一点。";
+    return;
+  }
+  warn.style.display="none";
+  meetF.style.display = M.mode==="meet" ? "block":"none";
+  chF.style.display = M.mode==="chase" ? "block":"none";
+  chN.style.display = M.mode==="chase" ? "block":"none";
+  const t=(M.d/vRel);
+  const ftxt=M.mode==="meet"
+    ? "t = d ÷ (v<sub>A</sub> + v<sub>B</sub>) = "+fmt(M.d,1)+" ÷ "+fmt(M.vA+M.vB,1)+" = "+fmt(t,2)+" s"
+    : "t = d ÷ (v<sub>A</sub> − v<sub>B</sub>) = "+fmt(M.d,1)+" ÷ "+fmt(vRel,1)+" = "+fmt(t,2)+" s";
+  (M.mode==="meet"?meetF:chF).innerHTML=ftxt;
+}
+
+const mCtx=$id("mCanvas").getContext("2d");
+const MW=$id("mCanvas").width, MH=$id("mCanvas").height;
+const mScale=42; // px per meter
+function drawMeet(t,meetT,meetX){
+  const ctx=mCtx; ctx.clearRect(0,0,MW,MH);
+  const laneY=MH*0.4, ballR=12;
+  const pxPerM=mScale;
+  const startA=70, startB=70+M.d*pxPerM;
+  const rel = M.mode==="meet" ? (M.vA+M.vB) : (M.vA-M.vB);
+
+  // ===== compute where each ball sits in the chosen reference frame =====
+  let drawA, drawB, aVel, bVel, header;
+  if(M.refMode==="ground"){
+    header="🏞️ 地面参照系（地面静止）：A、B 各自按自己的速度运动";
+    drawA = startA + M.vA*pxPerM*t;
+    drawB = M.mode==="meet" ? startB - M.vB*pxPerM*t : startB + M.vB*pxPerM*t;
+    aVel = M.vA; bVel = M.mode==="meet" ? -M.vB : M.vB;
+  } else {
+    const ref = M.refMode; // "A" or "B"
+    if(ref==="B"){
+      // B fixed (reference); A approaches at relative speed rel
+      header="🚩 以 B 为参照物（B 静止）：A 以相对速度 v_相对 = "+fmt(rel,1)+" m/s 朝 B 靠近";
+      drawB = startB;
+      drawA = startB - M.d*pxPerM + rel*pxPerM*t;
+      aVel = rel; bVel = 0;
+    } else {
+      // A fixed (reference); B approaches at relative speed rel
+      header="🚩 以 A 为参照物（A 静止）：B 以相对速度 v_相对 = "+fmt(rel,1)+" m/s 朝 A 靠近";
+      drawA = startA;
+      drawB = startA + M.d*pxPerM - rel*pxPerM*t;
+      aVel = 0; bVel = -rel;
+    }
+  }
+  // freeze the moving ball at the meeting spot once they meet
+  if(meetT!==null && t>=meetT){
+    if(M.refMode==="A"){ drawB = drawA; } else { drawA = drawB; }
+  }
+
+  // ground line
+  ctx.strokeStyle="#eef0f8"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(40,laneY); ctx.lineTo(MW-40,laneY); ctx.stroke();
+  // header
+  ctx.fillStyle="#9a7cf0"; ctx.font="bold 15px sans-serif"; ctx.textAlign="left";
+  ctx.fillText(header,8,18);
+
+  // ===== ball A =====
+  drawBall(ctx,drawA,laneY,ballR,"#5b8def");
+  ctx.fillStyle="#5b8def"; ctx.font="bold 15px sans-serif"; ctx.textAlign="center";
+  const aTag = M.refMode==="ground" ? "A ("+fmt(M.vA,1)+" m/s)" : (M.refMode==="B" ? "A("+fmt(rel,1)+" m/s)" : "A（静止）");
+  ctx.fillText(aTag,drawA,laneY-24);
+  if(aVel!==0){ arrow(ctx,drawA,laneY,drawA+aVel*pxPerM*0.5,laneY,"#5b8def",3); }
+
+  // ===== ball B =====
+  drawBall(ctx,drawB,laneY,ballR,"#f4739b");
+  ctx.fillStyle="#f4739b"; ctx.font="bold 15px sans-serif"; ctx.textAlign="center";
+  const bTag = M.refMode==="ground" ? "B ("+fmt(M.vB,1)+" m/s)" : (M.refMode==="A" ? "B("+fmt(rel,1)+" m/s)" : "B（静止）");
+  ctx.fillText(bTag,drawB,laneY-24);
+  if(bVel!==0){ arrow(ctx,drawB,laneY,drawB+bVel*pxPerM*0.5,laneY,"#f4739b",3); }
+
+  // ===== initial distance bracket (always show) =====
+  ctx.strokeStyle="#ffb14e"; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+  ctx.beginPath(); ctx.moveTo(startA,laneY+42); ctx.lineTo(startB,laneY+42); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle="#ffb14e"; ctx.font="bold 16px sans-serif";
+  ctx.fillText("初始距离 d = "+fmt(M.d,1)+" m",(startA+startB)/2,laneY+66);
+
+  // ===== meeting marker =====
+  if(meetT!==null && t>=meetT){
+    const mx = M.refMode==="B" ? startB : (M.refMode==="A" ? startA : meetX);
+    ctx.strokeStyle="#11966b"; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.arc(mx,laneY,ballR+7,0,7); ctx.stroke();
+    ctx.beginPath(); ctx.arc(mx,laneY,ballR+3,0,7); ctx.stroke();
+    ctx.fillStyle="#11966b"; ctx.font="bold 15px sans-serif"; ctx.textAlign="center";
+    ctx.fillText(
+      M.refMode==="ground" ? "🎯 相遇点 x = "+fmt((meetX-startA)/pxPerM,1)+" m" : "🎯 相遇/追上点",
+      mx, laneY-46);
+  }
+
+  // ===== caption =====
+  if(meetT===null){ return; } // warn message handled by updateMeetFormula
+  if(t<meetT){
+    $id("mCaption").innerHTML="⏳ 已经过去 "+fmt(t,1)+" s。相遇/追及时间 = "+fmt(meetT,2)+" s。";
+  } else {
+    let s = "✅ 相遇/追上啦！共用了 <b>"+fmt(meetT,2)+" s</b>。公式 <b>t = d ÷ v<sub>相对</sub></b>，v<sub>相对</sub> = "+fmt(rel,1)+" m/s（"+ (M.mode==="meet"?"相向，求和":"同向，求差") +"）。";
+    if(M.refMode!=="ground"){ s += " —— 看！换成这个参照系，其中一个物体静止，另一个就以相对速度 v<sub>相对</sub> 匀速靠近，结果完全一样。"; }
+    $id("mCaption").innerHTML=s;
+  }
+}
+function meetLoop(dt){
+  const {vA,vB,d}=M;
+  const rel = M.mode==="meet" ? vA+vB : vA-vB;
+  let meetT=null, meetX=null;
+  const startA=70, startB=70+d*mScale;
+  if(M.mode==="meet"){
+    if(rel>0){ meetT=d/rel; }
+  } else {
+    if(vA>vB){ meetT=d/(vA-vB); }
+  }
+  if(meetT!==null){
+    meetX= M.mode==="meet" ? startA+vA*meetT*mScale : startA+vA*meetT*mScale;
+    meetX=clamp(meetX,40,MW-40);
+  }
+  M.meetT=meetT; M.meetX=meetX;
+  drawMeet(M.t,meetT,meetX);
+  if(M.t<meetT){ M.t+=dt; }
+  else if(meetT!==null){ M.t=meetT; M.playing=false; $id("mPlay").textContent="▶ 重播"; }
+}
+function updateRefNote(){
+  const rel = M.mode==="meet" ? (M.vA+M.vB) : (M.vA-M.vB);
+  if(M.mode==="chase" && M.vA<=M.vB){
+    $id("mRefNote").innerHTML="⚠️ 追及问题需要 <b>A 比 B 快（v<sub>A</sub> &gt; v<sub>B</sub>）</b>，否则追不上。请把 A 调快一点。";
+    return;
+  }
+  let t;
+  if(M.refMode==="ground"){
+    t="🏞️ 地面参照系：A、B 各自按自己的速度 <b>v<sub>A</sub>="+fmt(M.vA,1)+"</b>、<b>v<sub>B</sub>="+fmt(M.vB,1)+"</b> 运动，二者一起缩短距离。";
+  } else if(M.refMode==="B"){
+    t="🚩 以 <b>B</b> 为参照物（把 B 看成静止）：<b>A</b> 就以相对速度 <b>v<sub>相对</sub> = "+fmt(rel,1)+" m/s</b> 朝 B 匀速靠近。相遇/追上时间 = d ÷ v<sub>相对</sub>。";
+  } else {
+    t="🚩 以 <b>A</b> 为参照物（把 A 看成静止）：<b>B</b> 就以相对速度 <b>v<sub>相对</sub> = "+fmt(rel,1)+" m/s</b> 朝 A 匀速靠近。时间 = d ÷ v<sub>相对</sub>。";
+  }
+  $id("mRefNote").innerHTML=t;
+}
+function meetReset(){
+  M.t=0; M.playing=true; $id("mPlay").textContent="⏸ 暂停";
+  updateMeetFormula(); updateRefNote();
+}
+/* reference-frame switcher */
+$id("refSeg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  M.refMode=b.dataset.r;
+  $id("refSeg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+  meetReset();
+});
+/* reset + slider wiring */
+$id("mReset").addEventListener("click",meetReset);
+onInput("mVA",()=>{M.vA=$id("mVA").valueAsNumber; meetReset();});
+onInput("mVB",()=>{M.vB=$id("mVB").valueAsNumber; meetReset();});
+onInput("mD",()=>{M.d=$id("mD").valueAsNumber; meetReset();});
+meetReset();
+
+/* ============================================================
+   QUIZ
+============================================================ */
+document.querySelectorAll(".q .opt").forEach(opt=>{
+  opt.addEventListener("click",()=>{
+    const q=opt.closest(".q");
+    const ok=opt.dataset.ok==="1";
+    q.querySelectorAll(".opt").forEach(o=>o.classList.remove("correct","wrong"));
+    opt.classList.add(ok?"correct":"wrong");
+    q.querySelector(".expl").classList.add("show");
+  });
+});
+
+/* ============================================================
+   MAIN LOOP
+============================================================ */
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+
+  // line — always render active tab; advance time only when playing
+  if($id("panel-line").classList.contains("active")){
+    if(L.playing){
+      const r=lineLoop(L.t);
+      if(r.reset){ L.t=0; } else { L.t+=dt; }
+    } else {
+      lineLoop(L.t);
+    }
+  }
+  // plane
+  if($id("panel-plane").classList.contains("active")){
+    if(P.playing){
+      const r=planeLoop(P.t);
+      if(r.reset){ P.t=0; } else { P.t+=dt; }
+    } else {
+      planeLoop(P.t);
+    }
+  }
+  // meet
+  if($id("panel-meet").classList.contains("active")){
+    if(M.playing){ meetLoop(dt); }
+    else { meetLoop(0); }
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

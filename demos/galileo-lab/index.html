@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>一起动起来｜伽利略变换实验室</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">↗</span><div><p class="eyebrow">小小物理实验室</p><h1>一起动起来</h1></div></div>
+      <div class="top-actions"><span class="live-dot"></span><span>互动演示</span><button class="icon-btn" id="resetBtn" title="重置实验">↻</button></div>
+    </header>
+
+    <section class="hero">
+      <div><span class="pill">GALILEO LAB · 01</span><h2>同一个运动，<br><em>换个角度看</em>会怎样？</h2><p>拖动滑块，让小车和观察者一起跑起来。看看速度如何在不同的参照系中“变身”！</p></div>
+      <div class="hero-orbit"><span class="orbit-dot dot-a"></span><span class="orbit-dot dot-b"></span><span class="orbit-dot dot-c"></span><span class="orbit-core">v</span></div>
+    </section>
+
+    <nav class="tabs" aria-label="实验章节"><button class="tab active" data-tab="lab">① 运动实验室</button><button class="tab" data-tab="concepts">② 概念小卡片</button><button class="tab" data-tab="problems">③ 相遇与追及</button></nav>
+
+    <section class="panel tab-panel active" id="lab-panel">
+      <div class="section-heading"><div><span class="section-kicker">LIVE SIMULATION</span><h3>一套运动，三双眼睛</h3></div><span class="formula-chip">v<sub>物/地</sub> = v<sub>物/车</sub> + v<sub>车/地</sub></span></div>
+      <div class="lab-grid">
+        <div class="stage-card">
+          <div class="stage-top"><div class="legend"><span class="legend-item"><i class="blue"></i>A车（物体）</span><span class="legend-item"><i class="orange"></i>B车</span></div><div class="timer" id="timer">t = 0.0 s</div></div><div class="frame-switcher"><span class="eye-label">👁 观察点在：</span><button class="frame-btn active" data-frame="ground">地面</button><button class="frame-btn" data-frame="object">A车</button><button class="frame-btn" data-frame="observer">B车</button><button class="frame-btn" data-frame="bird">小鸟</button><span class="frame-help" id="frameHelp">眼睛站在地面，两个物体都在移动</span></div>
+          <div class="stage" id="stage"><div class="sky-glow"></div><div class="observer-eye" id="observerEye">👁</div><div class="bird" id="bird"><span>🕊️</span><i class="velocity-arrow"></i><small>飞鸟 +3 m/s</small></div><div class="concept-bubble" id="conceptBubble">参照物：地面<br><b>谁在动？</b> 两辆车的位置都在变</div><div class="stage-equation" id="stageEquation">v小车/地 = +4 m/s</div><div class="track-label" id="trackLabel">地面参照系 · x（米）</div><div class="road"><div class="road-line"></div><div class="vehicle blue-car" id="objectCar"><span class="car-face">●</span><b>A车</b><i class="velocity-arrow"></i><small id="objectBadge">+4 m/s</small></div><div class="vehicle orange-car" id="observerCar"><span class="car-face">◉</span><b>B车</b><i class="velocity-arrow"></i><small id="observerBadge">+2 m/s</small></div></div><div class="axis"><span>0</span><span>10</span><span>20</span><span>30</span><span>40 m</span></div></div>
+          <div class="frame-readouts"><div class="readout"><span class="readout-dot blue"></span><div><small id="primaryReadoutLabel">当前视角看到的小车</small><strong id="groundReadout">+4.0 m/s</strong></div></div><div class="readout"><span class="readout-dot purple"></span><div><small>换参照系后的相对速度</small><strong id="relativeReadout">+2.0 m/s</strong></div></div></div>
+        </div>
+        <aside class="control-card"><div class="control-title"><span>自定义运动</span><span class="sparkle">✦</span></div><label>小车速度 <output id="objectSpeedOut">+4 m/s</output><input id="objectSpeed" type="range" min="-8" max="8" value="4" step="1" /></label><div class="direction-hint"><span>← 向左</span><span>向右 →</span></div><label>观察车速度 <output id="observerSpeedOut">+2 m/s</output><input id="observerSpeed" type="range" min="-8" max="8" value="2" step="1" /></label><div class="direction-hint"><span>← 向左</span><span>向右 →</span></div><div class="divider"></div><div class="control-row"><span>播放运动</span><button class="play-btn" id="playBtn">▶</button></div><button class="ghost-btn" id="demoBtn">换一个例子 <span>→</span></button><p class="tip">小提示：速度是带方向的哦！向右为正，向左为负。</p></aside>
+      </div>
+      <div class="equation-card"><div class="equation-icon">💡</div><div><span class="section-kicker">关键发现</span><p>在地面上，小车每秒前进 <strong id="eqGround">4</strong> 米；观察车每秒前进 <strong id="eqObserver">2</strong> 米。</p><div class="big-equation"><span id="eqObject">+4</span> − <span id="eqFrame">(+2)</span> = <strong id="eqRelative">+2 m/s</strong></div><small>小车相对于观察车的速度 = 小车相对地面的速度 − 观察车相对地面的速度</small></div></div>
+    </section>
+
+    <section class="panel tab-panel" id="concepts-panel"><div class="section-heading"><div><span class="section-kicker">PHYSICS DICTIONARY</span><h3>把难词变成生活画面</h3></div></div><div class="concept-grid" id="conceptGrid"></div></section>
+
+    <section class="panel tab-panel" id="problems-panel"><div class="section-heading"><div><span class="section-kicker">MEET & CHASE</span><h3>相遇和追及，原来都是“比一比”</h3></div></div><div class="problem-grid"><div class="problem-card meet"><span class="problem-icon">🤝</span><h4>相遇问题</h4><p>两个人从两边向对方走，距离会以<strong>相对速度</strong>变小。</p><div class="problem-formula">相遇时间 = 总路程 ÷（速度₁ + 速度₂）</div><div class="mini-solver"><label>相距 <input type="number" id="meetDistance" value="100" min="1" /> 米</label><label>小明 <input type="number" id="meetV1" value="3" min="0" /> m/s</label><label>小红 <input type="number" id="meetV2" value="2" min="0" /> m/s</label><div class="answer" id="meetAnswer">他们将在 <b>20.0 秒</b> 后相遇</div></div></div><div class="problem-card chase"><span class="problem-icon">🏃</span><h4>追及问题</h4><p>后面的人要追上前面的人，先抹平的是<strong>领先的距离</strong>。</p><div class="problem-formula">追及时间 = 领先距离 ÷（快者速度 − 慢者速度）</div><div class="mini-solver"><label>领先 <input type="number" id="chaseDistance" value="60" min="1" /> 米</label><label>小车 <input type="number" id="chaseV1" value="8" min="0" /> m/s</label><label>小兔 <input type="number" id="chaseV2" value="5" min="0" /> m/s</label><div class="answer" id="chaseAnswer">小车将在 <b>20.0 秒</b> 后追上</div></div></div></div><div class="steps"><span>① 画线段图，找出距离</span><span>② 统一方向，写出速度</span><span>③ 用相对速度求时间</span></div></section>
+
+    <footer><span>Galileo thought experiment · 学会换个参照物</span><span>每一次观察，都是一次新的理解。</span></footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
