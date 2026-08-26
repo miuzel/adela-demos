@@ -1,8 +1,8 @@
-# 伽利略变换 · 小学生公益开源课件
+# adela-demos · 小学生公益课件集合
 
-这是一个面向小学生、老师与家长的互动物理课件集合，用直观动画和可操作实验认识**参照物、相对速度与伽利略变换**。项目完全静态、无需安装依赖，公益开源，欢迎用于课堂、家庭学习和科普活动。
+adela-demos 是面向小学生、老师与家长的公益开源互动课件集合，将持续新增课件。项目用直观动画和可操作实验认识**参照物、相对速度与伽利略变换**，完全静态、无需安装依赖，欢迎用于课堂、家庭学习和科普活动。
 
-在线体验：<https://miuzel.github.io/galileo-transform-kids/>
+在线体验：<https://miuzel.github.io/adela-demos/>
 
 ## 课件特色
 
@@ -34,7 +34,7 @@
 
 ## 部署到 GitHub Pages
 
-仓库默认分支为 `main`，将仓库推送至 GitHub 后，进入 **Settings → Pages**，把 Source 设为 **Deploy from a branch**，Branch 选 `main`、folder 选 `/ (root)`。推送到 `main` 后 GitHub 会自动发布根目录。发布完成后访问：<https://miuzel.github.io/galileo-transform-kids/>。
+仓库默认分支为 `main`，将仓库推送至 GitHub 后，进入 **Settings → Pages**，把 Source 设为 **Deploy from a branch**，Branch 选 `main`、folder 选 `/ (root)`。推送到 `main` 后 GitHub 会自动发布根目录。发布完成后访问：<https://miuzel.github.io/adela-demos/>。
 
 ## 贡献与致谢
 
