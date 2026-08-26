@@ -228,6 +228,12 @@
 
     <div class="card">
       <h3>👀 两幅图 = 同一个运动</h3>
+      <div class="frame-switch" id="lineFrameSeg" role="group" aria-label="切换直线参考系">
+        <span class="small">当前观察：</span>
+        <button class="btn on" type="button" data-line-frame="ground">🏞️ 地面系 A</button>
+        <button class="btn" type="button" data-line-frame="cart">🚗 小车系 B</button>
+      </div>
+      <p class="small" id="lineFrameNote">地面系 A：小球速度 <b>v = v′ + u</b>；切换到 B 系可观察同一小球变为 v′。</p>
       <div class="canv-row">
         <div>
           <div class="small" style="margin-bottom:6px;font-weight:700">🏞️ 地面参照系（A系）</div>
@@ -529,18 +535,29 @@ tabs.forEach(t=>{
 /* ============================================================
    LINE DEMO
 ============================================================ */
-const L={u:1,vp:1.5,t:0,playing:true};
+const L={u:1,vp:1.5,t:0,playing:true,anchor:"ground",transition:null};
 function lineVals(){
   return {u:$id("lineU").valueAsNumber, vp:$id("lineVp").valueAsNumber};
 }
 function lineFxText(){
-  const {u,vp}=lineVals();
+  const {u,vp}=L;
   $id("lineFx").innerHTML='<span class="v">v = v′ + u = '+fmt(vp,1)+' + '+fmt(u,1)+' = '+fmt(vp+u,1)+' m/s</span>';
 }
-onInput("lineU",()=>{L.u=$id("lineU").valueAsNumber; L.t=0; lineFxText();});
-onInput("lineVp",()=>{L.vp=$id("lineVp").valueAsNumber; L.t=0; lineFxText();});
+onInput("lineU",()=>{const n=$id("lineU").valueAsNumber; if(Number.isFinite(n)) L.u=clamp(n,-2,2); L.t=0; lineFxText();});
+onInput("lineVp",()=>{const n=$id("lineVp").valueAsNumber; if(Number.isFinite(n)) L.vp=clamp(n,-2,2); L.t=0; lineFxText();});
 $id("linePlay").addEventListener("click",()=>{L.playing=!L.playing; $id("linePlay").textContent=L.playing?"⏸ 暂停":"▶ 播放";});
 $id("lineReset").addEventListener("click",()=>{L.t=0;});
+$id("lineFrameSeg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  const next=b.dataset.lineFrame;
+  if(next===L.anchor) return; // same target: keep any current transition intact
+  beginFrameTransition(L,L.anchor,next);
+  L.anchor=next;
+  $id("lineFrameSeg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+  $id("lineFrameNote").innerHTML=next==="ground"
+    ? "地面系 A：小球速度 <b>v = v′ + u</b> = "+fmt(L.vp+L.u,1)+" m/s。"
+    : "小车系 B：小车静止，小球速度 <b>v′</b> = "+fmt(L.vp,1)+" m/s；返回 A 系会加上 u。";
+});
 // initial fx
 lineFxText();
 setSpeedLabel("lineU","lineUV"); setSpeedLabel("lineVp","lineVpV");
@@ -558,8 +575,9 @@ function lineWorld(t){
   const ballX=margin + (u+vp)*PXS*t;
   return {cartX,ballX,ballVpx:(u+vp)*PXS, cartVpx:u*PXS, vpx:vp*PXS};
 }
-function drawGround(ctx,W,H,t){
-  ctx.clearRect(0,0,W,H);
+function drawGround(ctx,W,H,t,alpha=1,clear=true){
+  if(clear) ctx.clearRect(0,0,W,H);
+  ctx.save(); ctx.globalAlpha=alpha;
   // ground strip
   const gy=H*0.68;
   ctx.fillStyle="#eef3ff";
@@ -585,9 +603,11 @@ function drawGround(ctx,W,H,t){
   // motion hint arrows
   const startX=cartX;
   // small note
+   ctx.restore();
 }
-function drawCartFrame(ctx,W,H,t){
-  ctx.clearRect(0,0,W,H);
+function drawCartFrame(ctx,W,H,t,alpha=1,clear=true){
+  if(clear) ctx.clearRect(0,0,W,H);
+  ctx.save(); ctx.globalAlpha=alpha;
   // In cart frame, cart is fixed; ground moves left at -u; ball at vp
   const gy=H*0.68;
   // ground strip moves
@@ -615,6 +635,7 @@ function drawCartFrame(ctx,W,H,t){
   ctx.fillText("|V′| = "+fmt(L.vp,1)+" m/s",bx-10,gy-40);
   ctx.fillStyle="#c6cbd6";
   ctx.fillText("地面向左（-u）",10,gy+20);
+   ctx.restore();
 }
 function lineLoop(t){
   const W=cA.width,H=cA.height;
@@ -622,8 +643,15 @@ function lineLoop(t){
   const world=lineWorld(t);
   const cartBallX=W*0.25+40 + L.vp*PXS*t;
   if(world.ballX>W-30 || world.ballX<10 || cartBallX>W-20 || cartBallX<10){ return {reset:true}; }
-  drawGround(ctxA,W,H,t);
-  drawCartFrame(ctxB,W,H,t);
+  const tr=frameTransition(L,performance.now());
+  if(tr){
+    // Cross-fade complete frame drawings: positions, vectors and labels share one eased p.
+    drawGround(ctxA,W,H,t,1-tr.p,true); drawCartFrame(ctxA,W,H,t,tr.p,false);
+    drawGround(ctxB,W,H,t,1-tr.p,true); drawCartFrame(ctxB,W,H,t,tr.p,false);
+  } else {
+    // Keep the two canonical canvases as a comparison once the transition settles.
+    drawGround(ctxA,W,H,t); drawCartFrame(ctxB,W,H,t);
+  }
   return {reset:false};
 }
 
