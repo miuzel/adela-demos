@@ -40,7 +40,7 @@
       const start = (currentPage - 1) * pageSize;
       const visible = filteredDemos.slice(start, start + pageSize);
       const groups = visible.reduce((result, demo) => { (result[demo.topic] ||= []).push(demo); return result; }, {});
-      cards.innerHTML = visible.length ? Object.entries(groups).map(([topic, topicDemos]) => `<div class="topic-group"><h3 class="topic-heading">${topic}</h3>${topicDemos.map(demo => `<article class="card"><div class="icon">${demo.icon}</div><h3>${demo.title}</h3><p>${demo.desc}</p><a class="go" href="${demo.href}">开始体验　→</a></article>`).join('')}</div>`).join('') : '<div class="empty-state">没有找到匹配的课件，试试其他关键词吧。</div>';
+      cards.innerHTML = visible.length ? Object.entries(groups).map(([topic, topicDemos]) => `<div class="topic-group"><h3 class="topic-heading">${topic}</h3>${topicDemos.map(demo => `<article class="card"><div class="icon">${demo.icon}</div><h3>${demo.title}</h3><p>${demo.desc}</p><a class="go" href="viewer.html?src=${encodeURIComponent(demo.href)}&amp;title=${encodeURIComponent(demo.title)}">开始体验　→</a></article>`).join('')}</div>`).join('') : '<div class="empty-state">没有找到匹配的课件，试试其他关键词吧。</div>';
       resultCount.textContent = `共 ${filteredDemos.length} 个课件`;
       pageInfo.textContent = `第 ${currentPage} / ${totalPages} 页`;
       prevPage.disabled = currentPage === 1;

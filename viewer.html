@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="adela-demos 课件 viewer">
+  <title>adela-demos · 课件</title>
+  <style>
+    :root { --ink: #17233d; --line: #e5e9f5; --blue: #4169e1; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; color: var(--ink); font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; overflow: hidden; }
+    .viewer-bar {
+      height: 58px; display: flex; align-items: center; gap: 16px; padding: 0 18px;
+      border-bottom: 1px solid var(--line); background: #fff; position: sticky; top: 0; z-index: 1;
+    }
+    .back { min-height: 44px; display: inline-flex; align-items: center; color: var(--blue); font-weight: 700; text-decoration: none; white-space: nowrap; }
+    .title { flex: 1; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; font-size: 16px; }
+    .demo-frame { display: block; width: 100%; height: calc(100vh - 58px); border: 0; }
+    @media (max-width: 520px) {
+      .viewer-bar { height: 62px; gap: 8px; padding: 0 10px; }
+      .back { font-size: 14px; }
+      .title { font-size: 14px; }
+      .demo-frame { height: calc(100vh - 62px); }
+    }
+  </style>
+</head>
+<body>
+  <header class="viewer-bar">
+    <a class="back" href="./index.html">← 返回集合首页</a>
+    <h1 class="title" id="demoTitle">adela-demos</h1>
+  </header>
+  <iframe class="demo-frame" id="demoFrame" title="课件内容" aria-label="课件内容"></iframe>
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const rawSrc = params.get('src');
+      const rawTitle = params.get('title');
+      const home = './index.html';
+
+      // Only permit same-origin relative URLs; this also blocks javascript:/data: URLs.
+      let src;
+      try {
+        const candidate = new URL(rawSrc || '', window.location.href);
+        if (!rawSrc || candidate.origin !== window.location.origin || candidate.protocol !== window.location.protocol) throw new Error('invalid source');
+        src = candidate.href;
+      } catch (_) {
+        window.location.replace(home);
+        return;
+      }
+
+      const title = (rawTitle || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 120) || 'adela-demos';
+      const titleNode = document.querySelector('#demoTitle');
+      const frame = document.querySelector('#demoFrame');
+      titleNode.textContent = title;
+      document.title = `adela-demos · ${title}`;
+      frame.title = title;
+      frame.setAttribute('aria-label', title);
+      frame.src = src;
+    })();
+  </script>
+</body>
+</html>
