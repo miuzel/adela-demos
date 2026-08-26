@@ -24,7 +24,6 @@
 │   └── relative-velocity/        # 相对速度动画小课堂
 │       └── index.html
 ├── docs/demo-design-guideline.md # 视觉交互规范
-├── .github/workflows/pages.yml   # GitHub Pages 部署
 ├── LICENSE
 └── .gitignore
 ```
@@ -35,10 +34,7 @@
 
 ## 部署到 GitHub Pages
 
-1. Fork 或复制本仓库并推送到 GitHub 的 `miuzel/galileo-transform-kids`（默认分支 `main`）。
-2. 在仓库 **Settings → Pages** 中将 Source 设为 **GitHub Actions**。
-3. 推送到 `main` 后，`.github/workflows/pages.yml` 会使用官方 Pages Actions 自动发布根目录。
-4. 发布完成后访问：<https://miuzel.github.io/galileo-transform-kids/>。
+仓库默认分支为 `main`，将仓库推送至 GitHub 后，进入 **Settings → Pages**，把 Source 设为 **Deploy from a branch**，Branch 选 `main`、folder 选 `/ (root)`。推送到 `main` 后 GitHub 会自动发布根目录。发布完成后访问：<https://miuzel.github.io/galileo-transform-kids/>。
 
 ## 贡献与致谢
 
