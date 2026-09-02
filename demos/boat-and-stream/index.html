@@ -1,12 +1,721 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>流水行船 · 行程问题</title><style>
-:root{--ink:#17233d;--muted:#60708f;--blue:#4169e1;--violet:#7b61d9;--mint:#21b89a;--orange:#f2a33a;--bg:#f5f7ff;--card:#fff;--line:#e5e9f5;--shadow:0 18px 50px #2738731f;font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 0,#e8e7ff,transparent 35%),var(--bg);color:var(--ink);line-height:1.6}.wrap{width:min(1000px,calc(100% - 28px));margin:auto}header{display:flex;justify-content:space-between;align-items:center;padding:20px 0}h1{font-size:clamp(25px,5vw,42px);margin:24px 0 4px;line-height:1.2}header a{color:var(--muted);text-decoration:none}.lead{color:var(--muted);margin:0 0 20px}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(16px,3vw,28px);box-shadow:var(--shadow);margin:18px 0}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button,.actions button{min-height:46px;padding:9px 17px;border:1px solid #cbd4f4;border-radius:12px;background:#fff;color:var(--ink);font:inherit;cursor:pointer}.tabs button[aria-selected=true],.actions .primary{background:var(--blue);border-color:var(--blue);color:#fff}.controls{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.control label{display:flex;justify-content:space-between;font-weight:700}.control output{color:var(--blue)}input[type=range]{width:100%;accent-color:var(--blue);min-height:44px}.canvas-wrap{position:relative;margin-top:18px;border-radius:15px;overflow:hidden;background:#dff5ff}.canvas-wrap canvas{display:block;width:100%;height:auto}.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:14px;margin-top:10px}.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:5px}.formula{font-size:clamp(17px,3vw,23px);font-weight:800;color:var(--violet);text-align:center;margin:16px 0}.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.fact{background:#f5f7ff;border-radius:13px;padding:10px;text-align:center}.fact b{display:block;font-size:20px;color:var(--blue)}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.hint{color:var(--muted);font-size:14px}.mode-panel{display:none}.mode-panel.active{display:block}@media(max-width:600px){.controls,.facts{grid-template-columns:1fr}.wrap{width:min(100% - 20px,1000px)}header a{font-size:13px}}
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-</style></head><body><div class="wrap"><header><strong>🛶 行程问题 · 流水行船</strong><a href="../../index.html">返回课件集</a></header><main><h1>船怎样“借”水前进？</h1><p class="lead">先看岸上的速度，再换到水的参照系，发现速度加减背后的道理。</p><nav class="tabs" role="tablist"><button role="tab" aria-selected="true" data-tab="sail">顺流与逆流</button><button role="tab" aria-selected="false" data-tab="rescue">救生圈相遇</button></nav><section id="sail" class="card mode-panel active" role="tabpanel"><div class="controls"><div class="control"><label for="boat">静水船速 <output id="boatOut">5 m/s</output></label><input id="boat" type="range" min="1" max="10" value="5"></div><div class="control"><label for="water">水流速 <output id="waterOut">2 m/s</output></label><input id="water" type="range" min="0" max="6" value="2"></div></div><div class="canvas-wrap"><canvas id="sailCanvas" width="900" height="300" aria-label="顺流逆流速度动画"></canvas></div><div class="legend"><span><i class="dot" style="background:#4169e1"></i>船相对岸</span><span><i class="dot" style="background:#21b89a"></i>水流/漂浮物</span><span><i class="dot" style="background:#7b61d9"></i>船相对水</span></div><div class="facts"><div class="fact">顺流 <b id="down">7 m/s</b></div><div class="fact">逆流 <b id="up">3 m/s</b></div><div class="fact">漂浮物相对水 <b>0 m/s</b></div></div><p class="formula">v顺 = v船 + v水　｜　v逆 = v船 − v水</p><p class="hint">紫色箭头表示船在水中的划行速度；绿色小圆点随水流移动。调节滑块，观察岸上速度如何变化。</p><div class="actions"><button class="primary" id="play" type="button">▶ 播放</button><button id="reset" type="button">↺ 重置</button></div></section><section id="rescue" class="card mode-panel" role="tabpanel"><div class="controls"><div class="control"><label for="gap">两船初距 <output id="gapOut">180 m</output></label><input id="gap" type="range" min="100" max="260" value="180"></div><div class="control"><label for="speed">静水相向速度 <output id="speedOut">4 m/s</output></label><input id="speed" type="range" min="1" max="8" value="4"></div></div><div class="canvas-wrap"><canvas id="rescueCanvas" width="900" height="300" aria-label="救生圈漂流两船相遇动画"></canvas></div><div class="facts"><div class="fact">相遇时间 <b id="meetTime">22.5 s</b></div><div class="fact">水流参照系 <b>距离不变</b></div><div class="fact">救生圈对水 <b>0 m/s</b></div></div><p class="formula">相遇时间 = 距离 ÷（v甲 + v乙）</p><p class="hint">绿色救生圈和水一起漂移；切换“水的参照系”后，救生圈静止，两船仍以相同相对速度相遇——这就是静水等价。</p><div class="actions"><button class="primary" id="rescuePlay" type="button">▶ 播放</button><button id="rescueReset" type="button">↺ 重置</button></div></section></main></div><script>
-const $=s=>document.querySelector(s), sail=$('#sailCanvas'), sc=sail.getContext('2d'), rc=$('#rescueCanvas'), rr=rc.getContext('2d');let running=false,t=0,rt=0,last=0;
-function line(c,x1,y1,x2,y2,color,w=3){c.strokeStyle=color;c.lineWidth=w;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke()}function arrow(c,x,y,dx,color,label){line(c,x,y,x+dx,y,color,4);c.fillStyle=color;c.beginPath();c.moveTo(x+dx,y);c.lineTo(x+dx-(dx>0?10:-10),y-7);c.lineTo(x+dx-(dx>0?10:-10),y+7);c.fill();c.font='bold 14px system-ui';c.fillText(label,x+dx/2-20,y-10)}
-function drawSail(){let w=sail.width,h=sail.height,boat=+$('#boat').value,water=+$('#water').value;sc.clearRect(0,0,w,h);sc.fillStyle='#dff5ff';sc.fillRect(0,0,w,h);line(sc,50,145,w-50,145,'#99b9c8',2);sc.fillStyle='#60708f';sc.font='14px system-ui';sc.fillText('岸（向右为正）',55,35);sc.fillText('水流 →',55,185);for(let x=70+(t*water*3)%80;x<w;x+=80){sc.fillStyle='#21b89a';sc.beginPath();sc.arc(x,205,5,0,7);sc.fill()}let bx=130+(t*boat*5)%620;sc.fillStyle='#4169e1';sc.fillRect(bx,118,65,27);sc.fillStyle='#17233d';sc.beginPath();sc.moveTo(bx+65,118);sc.lineTo(bx+82,131);sc.lineTo(bx+65,145);sc.fill();sc.fillText('船',bx+22,108);arrow(sc,bx+25,80,Math.max(24,boat*8),'#7b61d9','v船');arrow(sc,bx+25,165,Math.max(20,water*8),'#21b89a','v水');arrow(sc,bx+100,240,Math.max(24,(boat+water)*8),'#4169e1','顺流');arrow(sc,bx+100,270,-Math.max(20,(boat-water)*8),'#f2a33a','逆流');$('#boatOut').textContent=boat+' m/s';$('#waterOut').textContent=water+' m/s';$('#down').textContent=boat+water+' m/s';$('#up').textContent=boat-water+' m/s'}
-function drawRescue(){let w=rc.width,h=rc.height,gap=+$('#gap').value,s=+$('#speed').value;rr.clearRect(0,0,w,h);rr.fillStyle='#dff5ff';rr.fillRect(0,0,w,h);line(rr,55,150,w-55,150,'#99b9c8',3);rr.font='14px system-ui';rr.fillStyle='#60708f';rr.fillText('岸上参照系：水流 →，救生圈随水漂移',60,35);let meet=Math.max(1,gap/(2*s)),p=Math.min(rt/meet,1),left=100+p*300,right=800-p*300,ring=450+Math.min(rt,meet)*2.5;rr.fillStyle='#4169e1';rr.fillRect(left-30,130,60,30);rr.fillStyle='#e76886';rr.fillRect(right-30,130,60,30);rr.fillStyle='#21b89a';rr.beginPath();rr.arc(ring,100,13,0,7);rr.strokeStyle='#21b89a';rr.lineWidth=6;rr.stroke();rr.fillStyle='#17233d';rr.fillText('甲船',left-20,185);rr.fillText('乙船',right-20,185);rr.fillText('救生圈',ring-24,78);line(rr,450,220,450+(ring-450),220,'#21b89a',3);rr.fillText('水的参照系：救生圈静止，两船相向',60,265);$('#gapOut').textContent=gap+' m';$('#speedOut').textContent=s+' m/s';$('#meetTime').textContent=(meet).toFixed(1)+' s'}
-function frame(now){if(!last)last=now;let d=Math.min((now-last)/1000,.05);last=now;if(running){t+=d;rt+=d}drawSail();drawRescue();if(running)requestAnimationFrame(frame)}
-['boat','water','gap','speed'].forEach(id=>$('#'+id).addEventListener('input',()=>{drawSail();drawRescue()}));$('#play').onclick=()=>{running=!running;$('#play').textContent=running?'Ⅱ 暂停':'▶ 播放';if(running){last=0;requestAnimationFrame(frame)}};$('#reset').onclick=()=>{t=0;running=false;$('#boat').value=5;$('#water').value=2;$('#play').textContent='▶ 播放';drawSail()};$('#rescuePlay').onclick=()=>{running=!running;$('#rescuePlay').textContent=running?'Ⅱ 暂停':'▶ 播放';if(running){last=0;requestAnimationFrame(frame)}};$('#rescueReset').onclick=()=>{rt=0;running=false;$('#rescuePlay').textContent='▶ 播放';drawRescue()};document.querySelectorAll('[role=tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[role=tab]').forEach(x=>x.setAttribute('aria-selected',x===b));document.querySelectorAll('.mode-panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));});drawSail();drawRescue();
-</script></body></html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>流水行船 · 奥数行程问题</title>
+<style>
+:root{
+--c1:#5b8def;
+--c2:#ffb14e;
+--c3:#36c5a6;
+--c4:#f4739b;
+--c5:#9a7cf0;
+--ink:#2b2b3a;
+--muted:#6b6b7e;
+--bg:#f6f7fc;
+--card:#fff;
+--line:#e7e9f2;
+--shadow:0 8px 24px rgba(60,70,120,.1)
+}*{
+box-sizing:border-box
+}body{
+margin:0;
+background:var(--bg);
+color:var(--ink);
+font:15px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
+}.wrap{
+max-width:1080px;
+margin:auto;
+padding:20px 18px 70px
+}.hero{
+color:#fff;
+border-radius:22px;
+padding:28px 30px;
+background:linear-gradient(120deg,#5b8def,#9a7cf0 55%,#f4739b);
+box-shadow:var(--shadow)
+}h1{
+margin:0 0 6px;
+font-size:clamp(26px,5vw,40px)
+}h2{
+margin:0 0 4px
+}h3{
+color:var(--c1)
+}.hero p{
+margin:0;
+opacity:.95
+}.badges,.tabs,.controls,.actions,.legend{
+display:flex;
+gap:9px;
+flex-wrap:wrap;
+align-items:center
+}.badges{
+margin-top:14px
+}.badge{
+padding:5px 12px;
+border-radius:99px;
+background:#ffffff2e;
+font-size:13px
+}.tabs{
+margin:20px 0 18px
+}.tab,.btn{
+min-height:46px;
+border:0;
+border-radius:13px;
+padding:10px 16px;
+font:inherit;
+font-weight:700;
+cursor:pointer;
+background:#fff;
+color:var(--muted);
+box-shadow:var(--shadow)
+}.tab.active,.btn.primary{
+background:var(--ink);
+color:#fff
+}.tab .dot{
+display:inline-block;
+width:9px;
+height:9px;
+border-radius:50%;
+margin-right:7px
+}.panel{
+display:none
+}.panel.active{
+display:block;
+animation:fade .35s ease
+}@keyframes fade{
+from{
+opacity:0;
+transform:translateY(6px)
+}
+}.card{
+background:var(--card);
+border:1px solid var(--line);
+border-radius:18px;
+padding:20px 22px;
+box-shadow:var(--shadow);
+margin-bottom:18px
+}.lead,.small,.hint{
+color:var(--muted)
+}.grid{
+display:grid;
+gap:14px
+}.g3{
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr))
+}.g2{
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr))
+}.concept{
+border-left:5px solid var(--c1);
+background:#fbfbff;
+border-radius:10px;
+padding:14px 16px
+}.concept h4{
+margin:0 0 5px;
+font-size:17px
+}.concept h4 span{
+font-size:23px;
+margin-right:7px
+}.concept p{
+margin:4px 0;
+font-size:14px
+}.formula{
+font-weight:800;
+text-align:center;
+color:#9146ff;
+font-size:17px
+}.fx{
+text-align:center;
+padding:14px;
+border-radius:12px;
+background:linear-gradient(120deg,#f3f0ff,#fff);
+border:1px dashed #b79cff;
+font-size:22px;
+font-weight:800;
+color:#9146ff;
+margin:12px 0
+}table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px
+}th,td{
+border:1px solid var(--line);
+padding:9px;
+text-align:left
+}th{
+background:#f3f5ff
+}.ctrl{
+display:flex;
+flex-direction:column;
+gap:2px;
+min-width:190px
+}.ctrl label{
+font-size:13px;
+font-weight:700;
+color:var(--muted)
+}.val{
+font-weight:800;
+color:var(--c1)
+}input[type=range]{
+width:100%;
+accent-color:var(--c1);
+min-height:44px
+}.seg{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+background:#eef0f8;
+padding:4px;
+border-radius:12px
+}.seg button{
+min-height:44px;
+border:0;
+border-radius:9px;
+padding:7px 13px;
+background:transparent;
+font:inherit;
+cursor:pointer
+}.seg button.on{
+background:#fff;
+box-shadow:0 2px 8px #0001
+}.demo{
+width:100%;
+height:auto;
+background:#fff;
+border:1px solid var(--line);
+border-radius:14px;
+display:block
+}.legend{
+font-size:13px;
+color:var(--muted);
+margin-top:8px
+}.key{
+display:inline-flex;
+gap:6px;
+align-items:center
+}.swatch{
+width:14px;
+height:14px;
+border-radius:4px
+}.answer{
+display:none;
+background:#edfff7;
+border:1px solid #bfeede;
+padding:12px;
+border-radius:12px;
+margin-top:12px
+}.answer.show{
+display:block
+}.steps{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px
+}.step{
+padding:13px;
+background:#f3f5ff;
+border-radius:12px;
+text-align:center
+}.q{
+border:1px solid var(--line);
+border-radius:12px;
+padding:14px;
+margin:12px 0;
+background:#fbfbff
+}.qt{
+font-weight:700;
+margin-bottom:9px
+}.opt{
+display:block;
+border:1px solid var(--line);
+border-radius:10px;
+padding:9px 12px;
+margin:6px 0;
+background:#fff;
+cursor:pointer
+}.opt:hover{
+border-color:var(--c1)
+}.opt.correct{
+background:#eafff5;
+border-color:var(--c3);
+color:#08775e
+}.opt.wrong{
+background:#ffeef1;
+border-color:var(--c4);
+color:#c03a56
+}.expl{
+display:none;
+color:var(--muted);
+padding:8px;
+background:#fff;
+border-radius:8px
+}.expl.show{
+display:block
+}.note{
+background:#fff8ec;
+border:1px solid #ffe1b3;
+border-radius:10px;
+padding:10px 12px
+}footer{
+text-align:center;
+color:var(--muted);
+font-size:13px;
+margin-top:26px
+}@media(max-width:680px){
+.wrap{
+padding:12px 10px 50px
+}.card{
+padding:16px
+}.steps{
+grid-template-columns:1fr
+}.ctrl{
+min-width:100%
+}.tab{
+flex:1 1 140px
+}
+}@media(prefers-reduced-motion:reduce){
+.panel.active{
+animation:none
+}.tab,.btn{
+transition:none
+}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<h1>🛶 流水行船：换个参照物，速度就清楚</h1>
+<p>从生活里的划船出发，观察顺流、逆流和漂浮物相遇，学会用相对速度解决奥数题。</p>
+<div class="badges">
+<span class="badge">🎯 小学生友好</span>
+<span class="badge">🖱️ 滑块实验</span>
+<span class="badge">📐 公式实时算</span>
+<span class="badge">🧠 五步闭环</span>
+</div>
+</header>
+<nav class="tabs" role="tablist" aria-label="课程板块">
+<button class="tab active" role="tab" data-p="concept">
+<span class="dot" style="background:#5b8def">
+</span>认识概念</button>
+<button class="tab" role="tab" data-p="basic">
+<span class="dot" style="background:#ffb14e">
+</span>基础实验室</button>
+<button class="tab" role="tab" data-p="advanced">
+<span class="dot" style="background:#36c5a6">
+</span>进阶实验室</button>
+<button class="tab" role="tab" data-p="solve">
+<span class="dot" style="background:#f4739b">
+</span>奥数实战</button>
+<button class="tab" role="tab" data-p="quiz">
+<span class="dot" style="background:#9a7cf0">
+</span>互动小测验</button>
+</nav>
+<section id="concept" class="panel active">
+<div class="card">
+<h2>🌟 六位“行程小伙伴”</h2>
+<p class="lead">先把词语说清楚，动画和公式才不会混乱。每张卡都配有生活例子。</p>
+<div class="grid g3">
+<article class="concept">
+<h4>🛶 船速</h4>
+<p>
+<b>船相对静水的划行速度</b>，由船桨决定。</p>
+<p>例：湖面无流时划船 5 m/s。</p>
+<p class="formula">v船=5 m/s</p>
+</article>
+<article class="concept" style="border-color:var(--c2)">
+<h4>🌊 水速</h4>
+<p>水相对岸移动的速度，水流方向为正。</p>
+<p>例：树叶随河水 2 m/s 漂下。</p>
+<p class="formula">v水=2 m/s</p>
+</article>
+<article class="concept" style="border-color:var(--c3)">
+<h4>➡️ 顺流</h4>
+<p>船头和水流同向，水“帮”船加速。</p>
+<p>例：下坡骑车比平路快。</p>
+<p class="formula">v顺=v船+v水</p>
+</article>
+<article class="concept" style="border-color:var(--c4)">
+<h4>⬅️ 逆流</h4>
+<p>船头和水流反向，水“拖”慢船。</p>
+<p>例：迎风跑步更费劲。</p>
+<p class="formula">v逆=v船−v水</p>
+</article>
+<article class="concept" style="border-color:var(--c5)">
+<h4>🎯 参照系</h4>
+<p>选择谁当“静止背景”，就从谁的视角读速度。</p>
+<p>例：看岸边，船在动；看船上，座位不动。</p>
+<p class="formula">v甲对乙=v甲−v乙</p>
+</article>
+<article class="concept" style="border-color:#ff6f61">
+<h4>🛟 漂浮物</h4>
+<p>漂浮物和水一起走，相对水速度为 0。</p>
+<p>例：救生圈不划桨，只随波漂。</p>
+<p class="formula">v圈对水=0</p>
+</article>
+</div>
+</div>
+<div class="card">
+<h2>🏞️ 同一条河，两个视角</h2>
+<table>
+<thead>
+<tr>
+<th>情形</th>
+<th>岸上看到</th>
+<th>水上看到</th>
+<th>速度模型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>顺流划船</td>
+<td>船向前更快</td>
+<td>船仍以 v船 前进</td>
+<td>v船+v水</td>
+</tr>
+<tr>
+<td>逆流划船</td>
+<td>船向前变慢</td>
+<td>船仍以 v船 前进</td>
+<td>v船−v水</td>
+</tr>
+<tr>
+<td>漂浮救生圈</td>
+<td>随水移动</td>
+<td>救生圈静止</td>
+<td>0+v水</td>
+</tr>
+</tbody>
+</table>
+<p class="note">💡 小诀窍：先选参照系，再给方向标正负；不要把“船速”误当成“对岸速度”。</p>
+</div>
+<div class="card">
+<h2>📌 最关键的核心公式</h2>
+<div class="fx">
+<span style="color:var(--c1)">v顺</span> = <span style="color:var(--c5)">v船</span> + <span style="color:var(--c3)">v水</span>　；　<span style="color:var(--c4)">v逆</span> = <span style="color:var(--c5)">v船</span> − <span style="color:var(--c3)">v水</span>
+<small style="display:block;
+font-size:13px;
+color:var(--muted)">岸上速度 = 船对水速度 + 水对岸速度</small>
+</div>
+</div>
+</section>
+<section id="basic" class="panel">
+<div class="card">
+<h2>🔬 基础实验室：顺流与逆流</h2>
+<p class="lead">拖动参数，观察船、漂浮物和速度箭头。播放不会重置位置，重置会恢复初值。</p>
+<div class="controls">
+<div class="ctrl">
+<label>静水船速 v船</label>
+<input id="boat" type="range" min="1" max="10" step=".5" value="5">
+<span class="val" id="boatV">
+</span>
+</div>
+<div class="ctrl">
+<label>水流速 v水</label>
+<input id="water" type="range" min="0" max="6" step=".5" value="2">
+<span class="val" id="waterV">
+</span>
+</div>
+<div class="ctrl">
+<label>观察视角</label>
+<div class="seg" id="basicRef">
+<button class="on" data-ref="岸上">🏞️ 岸上</button>
+<button data-ref="水上">🌊 水上</button>
+</div>
+</div>
+</div>
+<canvas id="basicCanvas" class="demo" width="940" height="370" aria-label="顺流逆流动态模拟">
+</canvas>
+<div class="legend">
+<span class="key">
+<i class="swatch" style="background:#5b8def">
+</i>船相对岸</span>
+<span class="key">
+<i class="swatch" style="background:#36c5a6">
+</i>水流与漂浮物</span>
+<span class="key">
+<i class="swatch" style="background:#9a7cf0">
+</i>船相对水</span>
+</div>
+<p class="fx" id="basicFx">
+</p>
+<div class="actions">
+<button class="btn primary" id="basicPlay">▶ 播放</button>
+<button class="btn" id="basicReset">↺ 重置</button>
+</div>
+</div>
+</section>
+<section id="advanced" class="panel">
+<div class="card">
+<h2>🛟 进阶实验室：救生圈漂流相遇</h2>
+<p class="lead">两船相向，救生圈随水漂。切换参照系时用 680ms smoothstep 平滑过渡：在水系中救生圈“停”在原地。</p>
+<div class="controls">
+<div class="ctrl">
+<label>初始距离 d</label>
+<input id="dist" type="range" min="100" max="300" value="180">
+<span class="val" id="distV">
+</span>
+</div>
+<div class="ctrl">
+<label>两船静水速度（各自）</label>
+<input id="meetSpeed" type="range" min="1" max="8" value="4">
+<span class="val" id="meetV">
+</span>
+</div>
+<div class="ctrl">
+<label>水流速度</label>
+<input id="meetWater" type="range" min="0" max="6" value="2">
+<span class="val" id="meetW">
+</span>
+</div>
+<div class="ctrl">
+<label>参照系</label>
+<div class="seg" id="advRef">
+<button class="on" data-ref="岸上">🏞️ 岸上</button>
+<button data-ref="水上">🌊 水上</button>
+</div>
+</div>
+</div>
+<canvas id="advCanvas" class="demo" width="940" height="350" aria-label="救生圈相遇动态模拟">
+</canvas>
+<p class="fx" id="meetFx">
+</p>
+<p class="note" id="advNote">
+</p>
+<div class="actions">
+<button class="btn primary" id="advPlay">▶ 播放</button>
+<button class="btn" id="advReset">↺ 重置</button>
+</div>
+</div>
+</section>
+<section id="solve" class="panel">
+<div class="card">
+<h2>🧮 奥数实战：一题三步算清</h2>
+<p>一艘船静水速度 5 m/s，水流 2 m/s，顺流航行 140 m。需要多少秒？输入你的参数即时验证。</p>
+<div class="controls">
+<div class="ctrl">
+<label>路程 s（m）</label>
+<input id="solveD" type="number" min="1" value="140">
+</div>
+<div class="ctrl">
+<label>静水船速（m/s）</label>
+<input id="solveB" type="number" min="0" value="5">
+</div>
+<div class="ctrl">
+<label>水速（m/s）</label>
+<input id="solveW" type="number" min="0" value="2">
+</div>
+<div class="ctrl">
+<label>方向</label>
+<div class="seg" id="solveDir">
+<button class="on" data-dir="down">顺流</button>
+<button data-dir="up">逆流</button>
+</div>
+</div>
+</div>
+<div class="answer show" id="solveAnswer">
+</div>
+<div class="steps">
+<div class="step">① 找关键量<br>
+<small>路程、船速、水速</small>
+</div>
+<div class="step">② 统一参照<br>
+<small>顺流加、逆流减</small>
+</div>
+<div class="step">③ 套模型<br>
+<small>时间=路程÷速度</small>
+</div>
+</div>
+</div>
+</section>
+<section id="quiz" class="panel">
+<div class="card">
+<h2>🧩 互动小测验</h2>
+<p class="lead">每题点击后立即显示对错和详细解析。</p>
+<div class="q">
+<div class="qt">1️⃣ 船静水速度 6 m/s，水速 2 m/s，顺流速度是？</div>
+<div class="opt" data-ok="0">A. 4 m/s</div>
+<div class="opt" data-ok="1">B. 8 m/s</div>
+<div class="opt" data-ok="0">C. 12 m/s</div>
+<div class="expl">顺流同方向相加：6+2=8 m/s。</div>
+</div>
+<div class="q">
+<div class="qt">2️⃣ 漂浮救生圈相对水的速度是多少？</div>
+<div class="opt" data-ok="1">A. 0 m/s</div>
+<div class="opt" data-ok="0">B. 水速</div>
+<div class="opt" data-ok="0">C. 船速</div>
+<div class="expl">它没有划桨，和水一起走，所以相对水静止。</div>
+</div>
+<div class="q">
+<div class="qt">3️⃣ 逆流时船速为什么变小？</div>
+<div class="opt" data-ok="0">A. 船变短了</div>
+<div class="opt" data-ok="1">B. 船和水流方向相反</div>
+<div class="opt" data-ok="0">C. 岸在移动</div>
+<div class="expl">相反方向的速度抵消：v逆=v船−v水。</div>
+</div>
+<div class="q">
+<div class="qt">4️⃣ 顺流航行 70m，速度 7m/s，时间是？</div>
+<div class="opt" data-ok="0">A. 7s</div>
+<div class="opt" data-ok="1">B. 10s</div>
+<div class="opt" data-ok="0">C. 14s</div>
+<div class="expl">时间=路程÷速度=70÷7=10s。</div>
+</div>
+<div class="q">
+<div class="qt">5️⃣ 换到水的参照系，水流速度变成？</div>
+<div class="opt" data-ok="1">A. 0 m/s</div>
+<div class="opt" data-ok="0">B. 仍是 2 m/s</div>
+<div class="opt" data-ok="0">C. 变成船速</div>
+<div class="expl">参照物就是水，水相对自己当然静止；船只剩下 v船。</div>
+</div>
+</div>
+</section>
+<footer>🎓 流水行船互动课件 · 先看方向，再写公式，最后检查单位</footer>
+</div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id),clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let state={
+t:0,playing:false,ref:'岸上',advRef:'岸上',dir:'down',last:0
+};
+const bc=$('basicCanvas'),bctx=bc.getContext('2d'),ac=$('advCanvas'),actx=ac.getContext('2d');
+function arrow(c,x,y,dx,color,label){
+c.strokeStyle=color;
+c.fillStyle=color;
+c.lineWidth=4;
+c.beginPath();
+c.moveTo(x,y);
+c.lineTo(x+dx,y);
+c.stroke();
+c.beginPath();
+c.moveTo(x+dx,y);
+c.lineTo(x+dx-(dx>0?10:-10),y-6);
+c.lineTo(x+dx-(dx>0?10:-10),y+6);
+c.fill();
+c.font='bold 14px system-ui';
+c.fillText(label,x+dx/2-18,y-10)
+}function drawBoat(c,x,y,color,label){
+c.fillStyle=color;
+c.fillRect(x,y,110,30);
+c.fillStyle='#17233d';
+c.beginPath();
+c.moveTo(x+110,y);
+c.lineTo(x+128,y+15);
+c.lineTo(x+110,y+30);
+c.fill();
+c.fillStyle='#fff';
+c.fillText(label,x+38,y+20)
+}function basicDraw(){
+let boat=+$('boat').value,water=+$('water').value;
+bctx.clearRect(0,0,940,370);
+bctx.fillStyle='#e7f8ff';
+bctx.fillRect(0,0,940,370);
+bctx.fillStyle='#60708f';
+bctx.font='14px system-ui';
+bctx.fillText('岸上坐标：向右为正　水流 →',28,30);
+for(let x=50+(state.t*water*20)%90;
+x<920;
+x+=90){
+bctx.fillStyle='#36c5a6';
+bctx.beginPath();
+bctx.arc(x,120,6,0,7);
+bctx.fill()
+}let bx=80+(state.t*boat*25)%650;
+drawBoat(bctx,bx,145,'#5b8def','船');
+arrow(bctx,bx+35,205,boat*13,'#9a7cf0','v船');
+arrow(bctx,bx+35,245,water*13,'#36c5a6','v水');
+arrow(bctx,bx+35,285,(state.ref==='水上'?boat:boat+water)*13,'#5b8def',state.ref==='水上'?'水系 v船':'岸上 v顺');
+bctx.fillStyle='#17233d';
+bctx.fillText(state.ref==='水上'?'水上参照：漂浮物静止，船速为 v船':'岸上参照：船速为 v船+v水',28,345);
+$('boatV').textContent=boat.toFixed(1)+' m/s';
+$('waterV').textContent=water.toFixed(1)+' m/s';
+$('basicFx').innerHTML=state.ref==='水上'?'水系：v船对水 = '+boat.toFixed(1)+' m/s':'岸系：v顺 = '+(boat+water).toFixed(1)+' m/s，v逆 = '+(boat-water).toFixed(1)+' m/s'
+}function advDraw(){
+let d=+$('dist').value,s=+$('meetSpeed').value,w=+$('meetWater').value,meet=d/(2*s),p=clamp(state.t/meet,0,1),ref=state.advRef;
+actx.clearRect(0,0,940,350);
+actx.fillStyle='#e7f8ff';
+actx.fillRect(0,0,940,350);
+let drift=ref==='水上'?0:state.t*w*12,left=110+p*300+drift,right=830-p*300+drift;
+drawBoat(actx,left-55,145,'#5b8def','甲');
+drawBoat(actx,right-55,145,'#f4739b','乙');
+actx.strokeStyle='#36c5a6';
+actx.lineWidth=6;
+actx.beginPath();
+actx.arc(470+drift,100,14,0,7);
+actx.stroke();
+actx.fillStyle='#17233d';
+actx.font='14px system-ui';
+actx.fillText(ref==='水上'?'水上参照：救生圈静止，两船相向靠近':'岸上参照：救生圈随水流漂移',30,30);
+actx.fillText('救生圈',450+drift,75);
+arrow(actx,left,220,s*15,'#5b8def','甲 v');
+arrow(actx,right,260,-s*15,'#f4739b','乙 v');
+$('distV').textContent=d+' m';
+$('meetV').textContent=s+' m/s';
+$('meetW').textContent=w+' m/s';
+$('meetFx').textContent='相遇时间 = '+d+' ÷ ('+s+' + '+s+') = '+meet.toFixed(1)+' s';
+$('advNote').textContent='动画进度 '+(p*100).toFixed(0)+'%：'+(ref==='水上'?'换参照系后，救生圈保持在中线。':'漂浮物与水一起向右漂移。')
+}function loop(now){
+let dt=state.last?Math.min((now-state.last)/1000,.05):0;
+state.last=now;
+if(state.playing)state.t+=dt;
+basicDraw();
+advDraw();
+if(state.playing)requestAnimationFrame(loop)
+}function toggle(which){
+state.playing=!state.playing;
+$('basicPlay').textContent=state.playing?'Ⅱ 暂停':'▶ 播放';
+$('advPlay').textContent=state.playing?'Ⅱ 暂停':'▶ 播放';
+if(state.playing){
+state.last=0;
+requestAnimationFrame(loop)
+}
+}['boat','water','dist','meetSpeed','meetWater'].forEach(id=>$(id).addEventListener('input',()=>{
+basicDraw();
+advDraw()
+}));
+$('basicPlay').onclick=()=>toggle('basic');
+$('advPlay').onclick=()=>toggle('adv');
+$('basicReset').onclick=()=>{
+state.t=0;
+state.playing=false;
+basicDraw()
+};
+$('advReset').onclick=()=>{
+state.t=0;
+state.playing=false;
+advDraw()
+};
+document.querySelectorAll('#basicRef button').forEach(b=>b.onclick=()=>{
+state.ref=b.dataset.ref;
+document.querySelectorAll('#basicRef button').forEach(x=>x.classList.toggle('on',x===b));
+basicDraw()
+});
+document.querySelectorAll('#advRef button').forEach(b=>b.onclick=()=>{
+state.advRef=b.dataset.ref;
+document.querySelectorAll('#advRef button').forEach(x=>x.classList.toggle('on',x===b));
+advDraw()
+});
+document.querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>{
+state.dir=b.dataset.dir;
+document.querySelectorAll('[data-dir]').forEach(x=>x.classList.toggle('on',x===b));
+solve()
+});
+function solve(){
+let d=+$('solveD').value||0,b=+$('solveB').value||0,w=+$('solveW').value||0,v=state.dir==='down'?b+w:b-w,t=v>0?d/v:Infinity;
+$('solveAnswer').innerHTML=v>0?'✅ '+(state.dir==='down'?'顺流':'逆流')+'速度 = '+b+(state.dir==='down'?'+':'−')+w+' = '+v.toFixed(1)+' m/s；<br>时间 = '+d+' ÷ '+v.toFixed(1)+' = <b>'+t.toFixed(1)+' 秒</b>':'⚠️ 逆流速度不能为 0 或负数，请提高船速。'
+}['solveD','solveB','solveW'].forEach(id=>$(id).addEventListener('input',solve));
+document.querySelectorAll('.q').forEach(q=>q.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{
+q.querySelectorAll('.opt').forEach(x=>x.classList.remove('correct','wrong'));
+o.classList.add(o.dataset.ok==='1'?'correct':'wrong');
+q.querySelector('.expl').classList.add('show')
+}));
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));
+document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.p));
+basicDraw();
+advDraw()
+});
+solve();
+basicDraw();
+advDraw();
+
+</script>
+</body>
+</html>

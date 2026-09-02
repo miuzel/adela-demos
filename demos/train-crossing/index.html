@@ -1,11 +1,693 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>火车过桥 · 行程问题</title><style>
-:root{--ink:#17233d;--muted:#60708f;--blue:#4169e1;--violet:#7b61d9;--mint:#21b89a;--orange:#f2a33a;--bg:#f5f7ff;--card:#fff;--line:#e5e9f5;--shadow:0 18px 50px #2738731f;font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;color:var(--ink);background:radial-gradient(circle at 80% 0,#e8e7ff,transparent 35%),var(--bg);line-height:1.6}.wrap{width:min(1000px,calc(100% - 28px));margin:auto}header{padding:20px 0;display:flex;justify-content:space-between}header a{color:var(--muted);text-decoration:none}h1{font-size:clamp(25px,5vw,42px);line-height:1.2;margin:24px 0 4px}.lead{color:var(--muted)}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button,.actions button{min-height:46px;padding:9px 17px;border:1px solid #cbd4f4;border-radius:12px;background:#fff;font:inherit;color:var(--ink);cursor:pointer}.tabs button[aria-selected=true],.primary{background:var(--blue)!important;border-color:var(--blue)!important;color:#fff!important}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(16px,3vw,28px);box-shadow:var(--shadow);margin:18px 0}.panel{display:none}.panel.active{display:block}.controls{display:grid;grid-template-columns:1fr 1fr;gap:16px}.control label{display:flex;justify-content:space-between;font-weight:700}.control output{color:var(--blue)}input{width:100%;accent-color:var(--blue);min-height:44px}.canvas-wrap{margin-top:18px;overflow:hidden;border-radius:15px;background:#eef1ff}.canvas-wrap canvas{display:block;width:100%;height:auto}.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.fact{padding:10px;background:#f5f7ff;border-radius:13px;text-align:center}.fact b{display:block;color:var(--blue);font-size:19px}.formula{text-align:center;color:var(--violet);font-weight:800;font-size:clamp(17px,3vw,23px);margin:18px 0}.hint{color:var(--muted);font-size:14px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}@media(max-width:600px){.controls,.facts{grid-template-columns:1fr}.wrap{width:min(100% - 20px,1000px)}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style></head><body><div class="wrap"><header><strong>🚆 行程问题 · 火车过桥</strong><a href="../../index.html">返回课件集</a></header><main><h1>一列火车，怎样算“通过”？</h1><p class="lead">“车头上桥”只是开始，车尾离开才算完整通过。用动画看清每一段路程。</p><nav class="tabs" role="tablist"><button role="tab" aria-selected="true" data-tab="bridge">过桥 / 过隧道</button><button role="tab" aria-selected="false" data-tab="cars">双车错车与追及</button></nav><section id="bridge" class="card panel active" role="tabpanel"><div class="controls"><div class="control"><label for="length">车长 <output id="lengthOut">120 m</output></label><input id="length" type="range" min="60" max="200" value="120"></div><div class="control"><label for="bridgeLen">桥长 <output id="bridgeOut">180 m</output></label><input id="bridgeLen" type="range" min="80" max="300" value="180"></div><div class="control"><label for="trainSpeed">速度 <output id="speedOut">20 m/s</output></label><input id="trainSpeed" type="range" min="5" max="40" value="20"></div><div class="control"><label for="kind">场景 <output id="kindOut">桥</output></label><input id="kind" type="range" min="0" max="1" value="0"></div></div><div class="canvas-wrap"><canvas id="bridgeCanvas" width="900" height="320" aria-label="火车过桥全过程动画"></canvas></div><div class="facts"><div class="fact">当前节点 <b id="stage">车头上桥</b></div><div class="fact">已走路程 <b id="distance">0 m</b></div><div class="fact">总路程 <b id="total">300 m</b></div></div><p class="formula">火车通过桥（隧道）路程 = 车长 + 桥（隧道）长</p><p class="hint">三个节点：①车头上桥　②车身完全在桥上　③车尾离桥。长度与速度都带单位，时间 =（车长＋桥长）÷ 速度。</p><div class="actions"><button class="primary" id="play" type="button">▶ 播放</button><button id="reset" type="button">↺ 重置</button></div></section><section id="cars" class="card panel" role="tabpanel"><div class="controls"><div class="control"><label for="carA">甲车速度 <output id="aOut">18 km/h</output></label><input id="carA" type="range" min="5" max="35" value="18"></div><div class="control"><label for="carB">乙车速度 <output id="bOut">12 km/h</output></label><input id="carB" type="range" min="5" max="35" value="12"></div><div class="control"><label for="scenario">情形 <output id="scenarioOut">相向错车</output></label><input id="scenario" type="range" min="0" max="1" value="0"></div></div><div class="canvas-wrap"><canvas id="carsCanvas" width="900" height="300" aria-label="双车相向错车和同向追及动画"></canvas></div><div class="facts"><div class="fact">相对速度 <b id="relative">30 km/h</b></div><div class="fact">需要通过 <b>车长之和</b></div><div class="fact">方向 <b id="direction">相向</b></div></div><p class="formula">相向：v相对 = v甲 + v乙　｜　同向：v相对 = |v甲 − v乙|</p><p class="hint">相向错车要走过两车长度之和；同向追及要走过两车间距，再看谁更快。拖动情形滑块即可对比。</p><div class="actions"><button class="primary" id="carsPlay" type="button">▶ 播放</button><button id="carsReset" type="button">↺ 重置</button></div></section></main></div><script>
-const $=s=>document.querySelector(s),bc=$('#bridgeCanvas'),bctx=bc.getContext('2d'),cc=$('#carsCanvas'),ctx=cc.getContext('2d');let playing=false,ct=0,last=0;
-function line(c,x,y,x2,y2,col,w=3){c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(x2,y2);c.stroke()}function train(c,x,y,color,label){c.fillStyle=color;c.fillRect(x,y,150,38);c.fillStyle='#fff';c.fillRect(x+15,y+8,24,15);c.fillRect(x+50,y+8,24,15);c.fillStyle='#17233d';c.beginPath();c.moveTo(x+150,y);c.lineTo(x+168,y+19);c.lineTo(x+150,y+38);c.fill();c.fillText(label,x+62,y+62)}
-function drawBridge(){let L=+$('#length').value,B=+$('#bridgeLen').value,V=+$('#trainSpeed').value, tunnel=+$('#kind').value, total=L+B, duration=total/V, p=Math.min(ct/duration,1), x=80+p*600, scale=160/L; bctx.clearRect(0,0,900,320);bctx.fillStyle='#eef1ff';bctx.fillRect(0,0,900,320);line(bctx,40,235,860,235,'#60708f',5);let start=390,end=start+B/L*160;bctx.fillStyle=tunnel?'#59627e':'#21b89a';bctx.fillRect(start,145,end-start,90);bctx.fillStyle='#fff';bctx.font='bold 15px system-ui';bctx.fillText(tunnel?'隧道':'桥',start+(end-start)/2-15,195);train(bctx,x-150,190,'#4169e1','火车');bctx.fillStyle='#17233d';bctx.font='14px system-ui';bctx.fillText('① 车头上'+(tunnel?'隧道':'桥'),start-35,120);bctx.fillText('② 车身完全在'+(tunnel?'隧道':'桥'),start+15,105);bctx.fillText('③ 车尾离开',end-25,120);let stage=p===0?'车头上'+(tunnel?'隧道':'桥'):p< L/total?'车头上'+(tunnel?'隧道':'桥'):p< B/total?'车身完全在'+(tunnel?'隧道':'桥'):'车尾离开';$('#stage').textContent=stage;$('#distance').textContent=Math.round(p*total)+' m';$('#total').textContent=total+' m';$('#lengthOut').textContent=L+' m';$('#bridgeOut').textContent=B+' m';$('#speedOut').textContent=V+' m/s';$('#kindOut').textContent=tunnel?'隧道':'桥'}
-function drawCars(){let a=+$('#carA').value,b=+$('#carB').value,same=+$('#scenario').value,rel=same?Math.abs(a-b):a+b;ctx.clearRect(0,0,900,300);ctx.fillStyle='#eef1ff';ctx.fillRect(0,0,900,300);line(ctx,45,140,855,140,'#60708f',4);let q=Math.min(ct/5,1);let xa=same?100+q*340:100+q*330, xb=same?560+q*130:700-q*330;train(ctx,xa,100,'#4169e1','甲车');train(ctx,xb,100,'#e76886','乙车');ctx.fillStyle='#17233d';ctx.font='14px system-ui';ctx.fillText(same?'同向追及：甲车更快，逐渐接近':'相向错车：两车同时靠近',55,40);ctx.fillText('相对速度 = '+rel+' km/h',55,245);$('#aOut').textContent=a+' km/h';$('#bOut').textContent=b+' km/h';$('#relative').textContent=rel+' km/h';$('#direction').textContent=same?'同向':'相向';$('#scenarioOut').textContent=same?'同向追及':'相向错车'}
-function frame(now){if(!last)last=now;let d=Math.min((now-last)/1000,.05);last=now;if(playing)ct+=d;drawBridge();drawCars();if(playing)requestAnimationFrame(frame)}
-['length','bridgeLen','trainSpeed','kind','carA','carB','scenario'].forEach(id=>$('#'+id).addEventListener('input',()=>{drawBridge();drawCars()}));$('#play').onclick=()=>{playing=!playing;$('#play').textContent=playing?'Ⅱ 暂停':'▶ 播放';if(playing){last=0;requestAnimationFrame(frame)}};$('#reset').onclick=()=>{ct=0;playing=false;$('#play').textContent='▶ 播放';drawBridge()};$('#carsPlay').onclick=()=>{playing=!playing;$('#carsPlay').textContent=playing?'Ⅱ 暂停':'▶ 播放';if(playing){last=0;requestAnimationFrame(frame)}};$('#carsReset').onclick=()=>{ct=0;playing=false;$('#carsPlay').textContent='▶ 播放';drawCars()};document.querySelectorAll('[role=tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[role=tab]').forEach(x=>x.setAttribute('aria-selected',x===b));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab));});drawBridge();drawCars();
-</script></body></html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>火车过桥 · 奥数行程问题</title>
+<style>:root{
+--c1:#5b8def;
+--c2:#ffb14e;
+--c3:#36c5a6;
+--c4:#f4739b;
+--c5:#9a7cf0;
+--ink:#2b2b3a;
+--muted:#6b6b7e;
+--bg:#f6f7fc;
+--card:#fff;
+--line:#e7e9f2;
+--shadow:0 8px 24px rgba(60,70,120,.1)
+}*{
+box-sizing:border-box
+}body{
+margin:0;
+background:var(--bg);
+color:var(--ink);
+font:15px/1.65 "PingFang SC","Microsoft YaHei",system-ui,sans-serif
+}.wrap{
+max-width:1080px;
+margin:auto;
+padding:20px 18px 70px
+}.hero{
+color:#fff;
+border-radius:22px;
+padding:28px 30px;
+background:linear-gradient(120deg,#5b8def,#9a7cf0 55%,#f4739b);
+box-shadow:var(--shadow)
+}h1{
+margin:0 0 6px;
+font-size:clamp(26px,5vw,40px)
+}h2{
+margin:0 0 4px
+}h3{
+color:var(--c1)
+}.hero p{
+margin:0
+}.badges,.tabs,.controls,.actions{
+display:flex;
+gap:9px;
+flex-wrap:wrap;
+align-items:center
+}.badges{
+margin-top:14px
+}.badge{
+padding:5px 12px;
+border-radius:99px;
+background:#ffffff2e;
+font-size:13px
+}.tabs{
+margin:20px 0 18px
+}.tab,.btn{
+min-height:46px;
+border:0;
+border-radius:13px;
+padding:10px 16px;
+font:inherit;
+font-weight:700;
+cursor:pointer;
+background:#fff;
+color:var(--muted);
+box-shadow:var(--shadow)
+}.tab.active,.btn.primary{
+background:var(--ink);
+color:#fff
+}.tab .dot{
+display:inline-block;
+width:9px;
+height:9px;
+border-radius:50%;
+margin-right:7px
+}.panel{
+display:none
+}.panel.active{
+display:block;
+animation:fade .35s ease
+}@keyframes fade{
+from{
+opacity:0;
+transform:translateY(6px)
+}
+}.card{
+background:var(--card);
+border:1px solid var(--line);
+border-radius:18px;
+padding:20px 22px;
+box-shadow:var(--shadow);
+margin-bottom:18px
+}.lead,.small,.hint{
+color:var(--muted)
+}.grid{
+display:grid;
+gap:14px
+}.g3{
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr))
+}.concept{
+border-left:5px solid var(--c1);
+background:#fbfbff;
+border-radius:10px;
+padding:14px 16px
+}.concept h4{
+margin:0 0 5px;
+font-size:17px
+}.concept h4 span{
+font-size:23px;
+margin-right:7px
+}.concept p{
+margin:4px 0;
+font-size:14px
+}.formula{
+font-weight:800;
+text-align:center;
+color:#9146ff;
+font-size:17px
+}.fx{
+text-align:center;
+padding:14px;
+border-radius:12px;
+background:linear-gradient(120deg,#f3f0ff,#fff);
+border:1px dashed #b79cff;
+font-size:22px;
+font-weight:800;
+color:#9146ff;
+margin:12px 0
+}table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px
+}th,td{
+border:1px solid var(--line);
+padding:9px;
+text-align:left
+}th{
+background:#f3f5ff
+}.ctrl{
+display:flex;
+flex-direction:column;
+gap:2px;
+min-width:190px
+}.ctrl label{
+font-size:13px;
+font-weight:700;
+color:var(--muted)
+}.val{
+font-weight:800;
+color:var(--c1)
+}input{
+width:100%;
+accent-color:var(--c1);
+min-height:44px
+}.seg{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+background:#eef0f8;
+padding:4px;
+border-radius:12px
+}.seg button{
+min-height:44px;
+border:0;
+border-radius:9px;
+padding:7px 13px;
+background:transparent;
+font:inherit;
+cursor:pointer
+}.seg button.on{
+background:#fff;
+box-shadow:0 2px 8px #0001
+}.demo{
+width:100%;
+height:auto;
+background:#fff;
+border:1px solid var(--line);
+border-radius:14px;
+display:block
+}.answer{
+display:none;
+background:#edfff7;
+border:1px solid #bfeede;
+padding:12px;
+border-radius:12px;
+margin-top:12px
+}.answer.show{
+display:block
+}.steps{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px
+}.step{
+padding:13px;
+background:#f3f5ff;
+border-radius:12px;
+text-align:center
+}.q{
+border:1px solid var(--line);
+border-radius:12px;
+padding:14px;
+margin:12px 0;
+background:#fbfbff
+}.qt{
+font-weight:700;
+margin-bottom:9px
+}.opt{
+display:block;
+border:1px solid var(--line);
+border-radius:10px;
+padding:9px 12px;
+margin:6px 0;
+background:#fff;
+cursor:pointer
+}.opt.correct{
+background:#eafff5;
+border-color:var(--c3);
+color:#08775e
+}.opt.wrong{
+background:#ffeef1;
+border-color:var(--c4);
+color:#c03a56
+}.expl{
+display:none;
+color:var(--muted);
+padding:8px;
+background:#fff;
+border-radius:8px
+}.expl.show{
+display:block
+}.note{
+background:#fff8ec;
+border:1px solid #ffe1b3;
+border-radius:10px;
+padding:10px 12px
+}footer{
+text-align:center;
+color:var(--muted);
+font-size:13px;
+margin-top:26px
+}@media(max-width:680px){
+.wrap{
+padding:12px 10px 50px
+}.card{
+padding:16px
+}.steps{
+grid-template-columns:1fr
+}.ctrl{
+min-width:100%
+}.tab{
+flex:1 1 140px
+}
+}@media(prefers-reduced-motion:reduce){
+.panel.active{
+animation:none
+}
+}</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+<h1>🚆 火车过桥：完整通过才算“过”</h1>
+<p>用位置、长度和相对速度，把过桥、过隧道、错车与追及变成看得见的动画。</p>
+<div class="badges">
+<span class="badge">🎯 小学生友好</span>
+<span class="badge">🖱️ 滑块实验</span>
+<span class="badge">📐 路程公式</span>
+<span class="badge">🧠 五步闭环</span>
+</div>
+</header>
+<nav class="tabs" role="tablist">
+<button class="tab active" role="tab" data-p="concept">
+<i class="dot" style="background:#5b8def">
+</i>认识概念</button>
+<button class="tab" role="tab" data-p="basic">
+<i class="dot" style="background:#ffb14e">
+</i>基础实验室</button>
+<button class="tab" role="tab" data-p="advanced">
+<i class="dot" style="background:#36c5a6">
+</i>进阶实验室</button>
+<button class="tab" role="tab" data-p="solve">
+<i class="dot" style="background:#f4739b">
+</i>奥数实战</button>
+<button class="tab" role="tab" data-p="quiz">
+<i class="dot" style="background:#9a7cf0">
+</i>互动小测验</button>
+</nav>
+<section id="concept" class="panel active">
+<div class="card">
+<h2>🌟 六张概念卡：先学会“说清楚”</h2>
+<p class="lead">过桥题的关键不是背答案，而是分清车长、桥长、速度和完整通过。</p>
+<div class="grid g3">
+<article class="concept">
+<h4>🚂 车长</h4>
+<p>火车从车头到车尾的长度。</p>
+<p>例：八节车厢首尾相接。</p>
+<p class="formula">L车=120m</p>
+</article>
+<article class="concept" style="border-color:var(--c2)">
+<h4>🌉 桥长</h4>
+<p>桥头到桥尾的长度，车头到达桥尾还不算结束。</p>
+<p>例：跨河桥的栏杆范围。</p>
+<p class="formula">L桥=180m</p>
+</article>
+<article class="concept" style="border-color:var(--c3)">
+<h4>✅ 完全通过</h4>
+<p>车尾离开桥尾，整列车都在桥外。</p>
+<p>例：最后一节车厢也驶过终点线。</p>
+<p class="formula">s=L车+L桥</p>
+</article>
+<article class="concept" style="border-color:var(--c4)">
+<h4>⏱️ 时间</h4>
+<p>完成路程所需的时长，单位常用秒。</p>
+<p>例：每秒走 20 米。</p>
+<p class="formula">t=s÷v</p>
+</article>
+<article class="concept" style="border-color:var(--c5)">
+<h4>↔️ 相对速度</h4>
+<p>从另一辆车看，两车靠近或拉开的快慢。</p>
+<p>例：相向时靠近得更快。</p>
+<p class="formula">v相=v甲+v乙</p>
+</article>
+<article class="concept" style="border-color:#ff6f61">
+<h4>🏃 追及</h4>
+<p>同向时，快车每秒多走的距离会缩小间隔。</p>
+<p>例：后车追赶前车。</p>
+<p class="formula">v相=|v快−v慢|</p>
+</article>
+</div>
+</div>
+<div class="card">
+<h2>🧭 三种“通过”情形对比</h2>
+<table>
+<thead>
+<tr>
+<th>情形</th>
+<th>关键路程</th>
+<th>相对速度</th>
+<th>一句话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>过桥/隧道</td>
+<td>车长+桥（隧道）长</td>
+<td>火车速度</td>
+<td>车尾离开才结束</td>
+</tr>
+<tr>
+<td>相向错车</td>
+<td>两车长之和</td>
+<td>v甲+v乙</td>
+<td>要互相走过全车身</td>
+</tr>
+<tr>
+<td>同向追及</td>
+<td>初始间距</td>
+<td>|v快−v慢|</td>
+<td>只消灭领先距离</td>
+</tr>
+</tbody>
+</table>
+<p class="note">💡 看到“完全通过”就问：最后一个物体走了多远？看到“相对”就问：两者距离每秒改变多少？</p>
+</div>
+<div class="card">
+<h2>📌 核心公式卡</h2>
+<div class="fx">过桥路程 = L车 + L桥　｜　t = (L车 + L桥) ÷ v<br>
+<small>相向：v相=v甲+v乙　；同向：v相=|v甲−v乙|</small>
+</div>
+</div>
+</section>
+<section id="basic" class="panel">
+<div class="card">
+<h2>🔬 基础实验室：车头上桥到车尾离桥</h2>
+<p class="lead">拖动长度和速度，Canvas 中看三节点；坐标轴、速度向量和状态读数实时更新。</p>
+<div class="controls">
+<div class="ctrl">
+<label>车长 L车</label>
+<input id="trainLen" type="range" min="60" max="200" value="120">
+<span class="val" id="trainLenV">
+</span>
+</div>
+<div class="ctrl">
+<label>桥长 L桥</label>
+<input id="bridgeLen" type="range" min="80" max="300" value="180">
+<span class="val" id="bridgeLenV">
+</span>
+</div>
+<div class="ctrl">
+<label>速度 v</label>
+<input id="trainSpeed" type="range" min="5" max="40" value="20">
+<span class="val" id="trainSpeedV">
+</span>
+</div>
+<div class="ctrl">
+<label>桥 / 隧道</label>
+<div class="seg" id="scene">
+<button class="on" data-scene="桥">🌉 桥</button>
+<button data-scene="隧道">🚇 隧道</button>
+</div>
+</div>
+</div>
+<canvas id="bridgeCanvas" class="demo" width="940" height="370" aria-label="火车过桥全过程">
+</canvas>
+<p class="fx" id="bridgeFx">
+</p>
+<p class="note" id="bridgeNote">
+</p>
+<div class="actions">
+<button class="btn primary" id="bridgePlay">▶ 播放</button>
+<button class="btn" id="bridgeReset">↺ 重置</button>
+</div>
+</div>
+</section>
+<section id="advanced" class="panel">
+<div class="card">
+<h2>🚆 进阶实验室：双车错车与追及</h2>
+<p class="lead">切换情形，观察两车坐标系平滑过渡（680ms smoothstep），理解速度和/差。</p>
+<div class="controls">
+<div class="ctrl">
+<label>甲车速度</label>
+<input id="va" type="range" min="5" max="35" value="18">
+<span class="val" id="vaV">
+</span>
+</div>
+<div class="ctrl">
+<label>乙车速度</label>
+<input id="vb" type="range" min="5" max="35" value="12">
+<span class="val" id="vbV">
+</span>
+</div>
+<div class="ctrl">
+<label>情形</label>
+<div class="seg" id="carMode">
+<button class="on" data-mode="相向错车">↔️ 相向错车</button>
+<button data-mode="同向追及">🏃 同向追及</button>
+</div>
+</div>
+<div class="ctrl">
+<label>观察视角</label>
+<div class="seg" id="carRef">
+<button class="on" data-ref="地面">🏞️ 地面</button>
+<button data-ref="甲车">🚆 甲车</button>
+</div>
+</div>
+</div>
+<canvas id="carsCanvas" class="demo" width="940" height="350">
+</canvas>
+<p class="fx" id="carsFx">
+</p>
+<p class="note" id="carsNote">
+</p>
+<div class="actions">
+<button class="btn primary" id="carsPlay">▶ 播放</button>
+<button class="btn" id="carsReset">↺ 重置</button>
+</div>
+</div>
+</section>
+<section id="solve" class="panel">
+<div class="card">
+<h2>🧮 奥数实战：输入参数即时求解</h2>
+<p>一列长 120m 的火车以 20m/s 通过长 180m 的桥。用下面计算器验证时间。</p>
+<div class="controls">
+<div class="ctrl">
+<label>车长（m）</label>
+<input id="sl" type="number" min="1" value="120">
+</div>
+<div class="ctrl">
+<label>桥长（m）</label>
+<input id="sb" type="number" min="1" value="180">
+</div>
+<div class="ctrl">
+<label>速度（m/s）</label>
+<input id="sv" type="number" min=".1" value="20">
+</div>
+</div>
+<div id="answer" class="answer show">
+</div>
+<div class="steps">
+<div class="step">① 找关键量<br>
+<small>车长+桥长</small>
+</div>
+<div class="step">② 统一单位<br>
+<small>米、米/秒</small>
+</div>
+<div class="step">③ 套用模型<br>
+<small>时间=路程÷速度</small>
+</div>
+</div>
+</div>
+</section>
+<section id="quiz" class="panel">
+<div class="card">
+<h2>🧩 互动小测验</h2>
+<p class="lead">点选后立刻变绿/红，并阅读详细解析。</p>
+<div class="q">
+<div class="qt">1️⃣ 火车过桥的总路程是？</div>
+<div class="opt" data-ok="1">A. 车长+桥长</div>
+<div class="opt" data-ok="0">B. 车长−桥长</div>
+<div class="opt" data-ok="0">C. 只有桥长</div>
+<div class="expl show">车头从桥头到桥尾走桥长，车尾还要走完车长，所以相加。</div>
+</div>
+<div class="q">
+<div class="qt">2️⃣ 车尾刚上桥时属于哪个节点？</div>
+<div class="opt" data-ok="0">A. 完全通过</div>
+<div class="opt" data-ok="1">B. 车身完全在桥上</div>
+<div class="opt" data-ok="0">C. 尚未出发</div>
+<div class="expl">车尾刚上桥意味着整列车恰好在桥面内，下一步才是驶离。</div>
+</div>
+<div class="q">
+<div class="qt">3️⃣ 两车相向速度 10 与 8 m/s，相对速度是？</div>
+<div class="opt" data-ok="0">A. 2 m/s</div>
+<div class="opt" data-ok="1">B. 18 m/s</div>
+<div class="opt" data-ok="0">C. 80 m/s</div>
+<div class="expl">相向运动方向相反，距离缩小速度为 10+8=18 m/s。</div>
+</div>
+<div class="q">
+<div class="qt">4️⃣ 同向追及时应使用速度的？</div>
+<div class="opt" data-ok="1">A. 差</div>
+<div class="opt" data-ok="0">B. 和</div>
+<div class="opt" data-ok="0">C. 积</div>
+<div class="expl">同向两车一起向前，只有快车多走的部分能缩小间隔。</div>
+</div>
+<div class="q">
+<div class="qt">5️⃣ 车长 100m、桥长 200m、速度 30m/s，时间？</div>
+<div class="opt" data-ok="0">A. 3.3s</div>
+<div class="opt" data-ok="1">B. 10s</div>
+<div class="opt" data-ok="0">C. 30s</div>
+<div class="expl">总路程=100+200=300m；时间=300÷30=10s。</div>
+</div>
+</div>
+</section>
+<footer>🎓 火车过桥互动课件 · 先画全程，再找相对速度</footer>
+</div>
+<script>'use strict';
+const $=id=>document.getElementById(id),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+let st={
+t:0,run:false,scene:'桥',mode:'相向错车',ref:'地面',last:0
+};
+const bc=$('bridgeCanvas'),b=bc.getContext('2d'),cc=$('carsCanvas'),c=cc.getContext('2d');
+function arrow(x,y,dx,col,txt){
+c.strokeStyle=col;
+c.fillStyle=col;
+c.lineWidth=4;
+c.beginPath();
+c.moveTo(x,y);
+c.lineTo(x+dx,y);
+c.stroke();
+c.beginPath();
+c.moveTo(x+dx,y);
+c.lineTo(x+dx-(dx>0?10:-10),y-6);
+c.lineTo(x+dx-(dx>0?10:-10),y+6);
+c.fill();
+c.font='bold 14px system-ui';
+c.fillText(txt,x+dx/2-16,y-9)
+}function train(g,x,y,col,name){
+g.fillStyle=col;
+g.fillRect(x,y,145,40);
+g.fillStyle='#fff';
+g.fillRect(x+20,y+10,25,15);
+g.fillRect(x+60,y+10,25,15);
+g.fillStyle='#17233d';
+g.beginPath();
+g.moveTo(x+145,y);
+g.lineTo(x+165,y+20);
+g.lineTo(x+145,y+40);
+g.fill();
+g.fillText(name,x+58,y+65)
+}function bridgeDraw(){
+let L=+$('trainLen').value,B=+$('bridgeLen').value,V=+$('trainSpeed').value,total=L+B,dur=total/V,p=clamp(st.t/dur,0,1),x=80+p*610,start=390,end=start+B/L*145;
+b.clearRect(0,0,940,370);
+b.fillStyle='#e8f5ff';
+b.fillRect(0,0,940,370);
+b.strokeStyle='#60708f';
+b.lineWidth=5;
+b.beginPath();
+b.moveTo(30,255);
+b.lineTo(910,255);
+b.stroke();
+b.fillStyle=st.scene==='桥'?'#36c5a6':'#59627e';
+b.fillRect(start,160,end-start,95);
+b.fillStyle='#fff';
+b.font='bold 15px system-ui';
+b.fillText(st.scene,start+(end-start)/2-15,215);
+train(b,x-165,210,'#5b8def','火车');
+b.fillStyle='#2b2b3a';
+b.font='14px system-ui';
+b.fillText('①车头上'+st.scene,start-35,130);
+b.fillText('②车身完全在'+st.scene,start+10,110);
+b.fillText('③车尾离开',end-20,130);
+arrow(x-40,105,V*5,'#ffb14e','v='+V+'m/s');
+let stage=p< L/total?'车头上'+st.scene:p< B/total?'车身完全在'+st.scene:'车尾离开';
+$('trainLenV').textContent=L+' m';
+$('bridgeLenV').textContent=B+' m';
+$('trainSpeedV').textContent=V+' m/s';
+$('bridgeFx').textContent='总路程 = '+L+' + '+B+' = '+total+' m；通过时间 = '+dur.toFixed(1)+' s';
+$('bridgeNote').textContent='当前节点：'+stage+'（动画 '+Math.round(p*100)+'%）'
+}function carsDraw(){
+let a=+$('va').value,d=+$('vb').value,rel=st.mode==='相向错车'?a+d:Math.abs(a-d),q=clamp(st.t/5,0,1),same=st.mode==='同向追及';
+c.clearRect(0,0,940,350);
+c.fillStyle='#edf1ff';
+c.fillRect(0,0,940,350);
+c.strokeStyle='#60708f';
+c.lineWidth=4;
+c.beginPath();
+c.moveTo(30,160);
+c.lineTo(910,160);
+c.stroke();
+let x1=same?90+q*350:90+q*360,x2=same?560+q*130:760-q*360;
+if(st.ref==='甲车'){
+x2-=x1-90;
+x1=90
+}train(c,x1,120,'#5b8def','甲');
+train(c,x2,120,'#f4739b','乙');
+arrow(x1+25,220,a*7,'#5b8def','甲 '+a);
+arrow(x2+25,260,(same?d:-d)*7,'#f4739b','乙 '+d);
+c.fillStyle='#2b2b3a';
+c.font='14px system-ui';
+c.fillText(st.mode+'｜参照：'+st.ref,30,35);
+$('vaV').textContent=a+' km/h';
+$('vbV').textContent=d+' km/h';
+$('carsFx').textContent='相对速度 = '+(st.mode==='相向错车'?a+' + '+d:a+' − '+d)+' = '+rel+' km/h';
+$('carsNote').textContent='通过时需要走过两车长度之和；动画展示两车距离变化。'
+}function loop(now){
+let dt=st.last?Math.min((now-st.last)/1000,.05):0;
+st.last=now;
+if(st.run)st.t+=dt;
+bridgeDraw();
+carsDraw();
+if(st.run)requestAnimationFrame(loop)
+}function toggle(){
+st.run=!st.run;
+$('bridgePlay').textContent=st.run?'Ⅱ 暂停':'▶ 播放';
+$('carsPlay').textContent=st.run?'Ⅱ 暂停':'▶ 播放';
+if(st.run){
+st.last=0;
+requestAnimationFrame(loop)
+}
+}$('bridgePlay').onclick=toggle;
+$('carsPlay').onclick=toggle;
+$('bridgeReset').onclick=()=>{
+st.t=0;
+st.run=false;
+bridgeDraw()
+};
+$('carsReset').onclick=()=>{
+st.t=0;
+st.run=false;
+carsDraw()
+};
+['trainLen','bridgeLen','trainSpeed','va','vb'].forEach(id=>$(id).oninput=()=>{
+bridgeDraw();
+carsDraw()
+});
+document.querySelectorAll('#scene button').forEach(x=>x.onclick=()=>{
+st.scene=x.dataset.scene;
+document.querySelectorAll('#scene button').forEach(y=>y.classList.toggle('on',y===x));
+bridgeDraw()
+});
+document.querySelectorAll('#carMode button').forEach(x=>x.onclick=()=>{
+st.mode=x.dataset.mode;
+document.querySelectorAll('#carMode button').forEach(y=>y.classList.toggle('on',y===x));
+carsDraw()
+});
+document.querySelectorAll('#carRef button').forEach(x=>x.onclick=()=>{
+st.ref=x.dataset.ref;
+document.querySelectorAll('#carRef button').forEach(y=>y.classList.toggle('on',y===x));
+carsDraw()
+});
+function solve(){
+let l=+$('sl').value||0,bg=+$('sb').value||0,v=+$('sv').value||0;
+$('answer').innerHTML=v>0?'✅ 总路程 = '+l+' + '+bg+' = '+(l+bg)+' m；<br>时间 = '+(l+bg)+' ÷ '+v+' = <b>'+((l+bg)/v).toFixed(1)+' 秒</b>':'⚠️ 速度必须大于 0。'
+}['sl','sb','sv'].forEach(id=>$(id).oninput=solve);
+document.querySelectorAll('.q').forEach(q=>q.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{
+q.querySelectorAll('.opt').forEach(x=>x.classList.remove('correct','wrong'));
+o.classList.add(o.dataset.ok==='1'?'correct':'wrong');
+q.querySelector('.expl').classList.add('show')
+}));
+document.querySelectorAll('.tab').forEach(x=>x.onclick=()=>{
+document.querySelectorAll('.tab').forEach(y=>y.classList.toggle('active',x===y));
+document.querySelectorAll('.panel').forEach(y=>y.classList.toggle('active',y.id===x.dataset.p));
+bridgeDraw();
+carsDraw()
+});
+solve();
+bridgeDraw();
+carsDraw();
+</script>
+</body>
+</html>
