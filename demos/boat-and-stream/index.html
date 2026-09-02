@@ -415,6 +415,13 @@ color:var(--muted)">岸上速度 = 船对水速度 + 水对岸速度</small>
 </span>
 </div>
 <div class="ctrl">
+<label>航行方向</label>
+<div class="seg" id="basicDir">
+<button class="on" data-dir="1">向右 →</button>
+<button data-dir="-1">← 向左</button>
+</div>
+</div>
+<div class="ctrl">
 <label>观察视角</label>
 <div class="seg" id="basicRef">
 <button class="on" data-ref="岸上">🏞️ 岸上</button>
@@ -573,7 +580,7 @@ color:var(--muted)">岸上速度 = 船对水速度 + 水对岸速度</small>
 'use strict';
 const $=id=>document.getElementById(id),clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let state={
-t:0,playing:false,ref:'岸上',advRef:'岸上',dir:'down',last:0
+t:0,playing:false,ref:'岸上',advRef:'岸上',dir:'down',basicDir:1,last:0
 };
 const bc=$('basicCanvas'),bctx=bc.getContext('2d'),ac=$('advCanvas'),actx=ac.getContext('2d');
 function arrow(c,x,y,dx,color,label){
@@ -591,17 +598,18 @@ c.lineTo(x+dx-(dx>0?10:-10),y+6);
 c.fill();
 c.font='bold 14px system-ui';
 c.fillText(label,x+dx/2-18,y-10)
-}function drawBoat(c,x,y,color,label){
-c.fillStyle=color;
-c.fillRect(x,y,110,30);
-c.fillStyle='#17233d';
-c.beginPath();
-c.moveTo(x+110,y);
-c.lineTo(x+128,y+15);
-c.lineTo(x+110,y+30);
-c.fill();
-c.fillStyle='#fff';
-c.fillText(label,x+38,y+20)
+}function drawBoat(c,x,y,color,label,dir=1){
+ c.save();
+ if(dir<0){c.translate(x+110,0);c.scale(-1,1);x=0}
+ c.fillStyle=color;
+ c.fillRect(x,y,110,30);
+ c.fillStyle='#17233d';
+ c.beginPath();
+ c.moveTo(x+110,y);
+ c.lineTo(x+128,y+15);
+ c.lineTo(x+110,y+30);
+ c.fill();
+ c.fillStyle='#fff';c.font='bold 14px system-ui';c.fillText(label,x+38,y+20);c.restore()
 }function basicDraw(){
 let boat=+$('boat').value,water=+$('water').value;
 bctx.clearRect(0,0,940,370);
@@ -610,18 +618,16 @@ bctx.fillRect(0,0,940,370);
 bctx.fillStyle='#60708f';
 bctx.font='14px system-ui';
 bctx.fillText('岸上坐标：向右为正　水流 →',28,30);
-for(let x=50+(state.t*water*20)%90;
-x<920;
-x+=90){
-bctx.fillStyle='#36c5a6';
-bctx.beginPath();
-bctx.arc(x,120,6,0,7);
-bctx.fill()
-}let bx=80+(state.t*boat*25)%650;
-drawBoat(bctx,bx,145,'#5b8def','船');
-arrow(bctx,bx+35,205,boat*13,'#9a7cf0','v船');
-arrow(bctx,bx+35,245,water*13,'#36c5a6','v水');
-arrow(bctx,bx+35,285,(state.ref==='水上'?boat:boat+water)*13,'#5b8def',state.ref==='水上'?'水系 v船':'岸上 v顺');
+let waterView=state.ref==='水上';
+for(let x=50+(waterView?-state.t*water*20:state.t*water*20)%90;x<920;x+=90){
+ bctx.fillStyle='#36c5a6';bctx.beginPath();bctx.arc(x,120,6,0,7);bctx.fill();
+ bctx.fillStyle='#8bb26d';bctx.fillRect(x-3,68,6,45);
+}
+let net=waterView?boat:boat+water;let direction=state.basicDir;let travel=direction*net;let bx=direction>0?80+(state.t*net*25)%650:730-(state.t*net*25)%650;
+drawBoat(bctx,bx,145,'#5b8def','船',direction);
+arrow(bctx,bx+55,205,direction*boat*13,'#9a7cf0','v船');
+arrow(bctx,bx+55,245,water*13,'#36c5a6','v水');
+arrow(bctx,bx+55,285,direction*(state.ref==='水上'?boat:boat+water)*13,'#5b8def',state.ref==='水上'?'水系 v船':'岸上 v顺');
 bctx.fillStyle='#17233d';
 bctx.fillText(state.ref==='水上'?'水上参照：漂浮物静止，船速为 v船':'岸上参照：船速为 v船+v水',28,345);
 $('boatV').textContent=boat.toFixed(1)+' m/s';
@@ -692,9 +698,14 @@ state.advRef=b.dataset.ref;
 document.querySelectorAll('#advRef button').forEach(x=>x.classList.toggle('on',x===b));
 advDraw()
 });
-document.querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>{
+document.querySelectorAll('#basicDir button').forEach(b=>b.onclick=()=>{
+state.basicDir=+b.dataset.dir;
+document.querySelectorAll('#basicDir button').forEach(x=>x.classList.toggle('on',x===b));
+basicDraw()
+});
+document.querySelectorAll('#solveDir [data-dir]').forEach(b=>b.onclick=()=>{
 state.dir=b.dataset.dir;
-document.querySelectorAll('[data-dir]').forEach(x=>x.classList.toggle('on',x===b));
+document.querySelectorAll('#solveDir [data-dir]').forEach(x=>x.classList.toggle('on',x===b));
 solve()
 });
 function solve(){

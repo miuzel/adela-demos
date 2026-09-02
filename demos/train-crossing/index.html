@@ -541,45 +541,39 @@ let st={
 t:0,run:false,scene:'桥',mode:'相向错车',ref:'地面',last:0
 };
 const bc=$('bridgeCanvas'),b=bc.getContext('2d'),cc=$('carsCanvas'),c=cc.getContext('2d');
-function arrow(x,y,dx,col,txt){
-c.strokeStyle=col;
-c.fillStyle=col;
-c.lineWidth=4;
-c.beginPath();
-c.moveTo(x,y);
-c.lineTo(x+dx,y);
-c.stroke();
-c.beginPath();
-c.moveTo(x+dx,y);
-c.lineTo(x+dx-(dx>0?10:-10),y-6);
-c.lineTo(x+dx-(dx>0?10:-10),y+6);
-c.fill();
-c.font='bold 14px system-ui';
-c.fillText(txt,x+dx/2-16,y-9)
-}function train(g,x,y,col,name){
+function arrow(g,x,y,dx,col,txt){
+g.strokeStyle=col;
 g.fillStyle=col;
-g.fillRect(x,y,145,40);
-g.fillStyle='#fff';
-g.fillRect(x+20,y+10,25,15);
-g.fillRect(x+60,y+10,25,15);
-g.fillStyle='#17233d';
+g.lineWidth=4;
 g.beginPath();
-g.moveTo(x+145,y);
-g.lineTo(x+165,y+20);
-g.lineTo(x+145,y+40);
+g.moveTo(x,y);
+g.lineTo(x+dx,y);
+g.stroke();
+g.beginPath();
+g.moveTo(x+dx,y);
+g.lineTo(x+dx-(dx>0?10:-10),y-6);
+g.lineTo(x+dx-(dx>0?10:-10),y+6);
 g.fill();
-g.fillText(name,x+58,y+65)
+g.font='bold 14px system-ui';
+g.fillText(txt,x+dx/2-16,y-9)
+}function train(g,x,y,col,name,dir=1){
+g.save();if(dir<0){g.translate(x+145,0);g.scale(-1,1);x=0}
+g.fillStyle=col;g.fillRect(x,y,145,40);g.fillStyle='#fff';g.fillRect(x+20,y+10,25,15);g.fillRect(x+60,y+10,25,15);g.fillStyle='#17233d';g.beginPath();g.moveTo(x+145,y);g.lineTo(x+165,y+20);g.lineTo(x+145,y+40);g.fill();g.fillStyle='#2b2b3a';g.font='bold 14px system-ui';g.fillText(name,x+58,y+65);g.restore()
 }function bridgeDraw(){
 let L=+$('trainLen').value,B=+$('bridgeLen').value,V=+$('trainSpeed').value,total=L+B,dur=total/V,p=clamp(st.t/dur,0,1),x=80+p*610,start=390,end=start+B/L*145;
 b.clearRect(0,0,940,370);
-b.fillStyle='#e8f5ff';
-b.fillRect(0,0,940,370);
+b.fillStyle='#e8f5ff';b.fillRect(0,0,940,370);
+/* 具象桥梁/隧道：山体、拱洞、桥墩、梁和栏杆 */
+if(st.scene==='隧道'){
+ b.fillStyle='#8aa0bb';b.beginPath();b.moveTo(340,255);b.lineTo(340,150);b.quadraticCurveTo(470,35,600,150);b.lineTo(600,255);b.fill();b.fillStyle='#26374f';b.beginPath();b.arc(470,190,72,Math.PI,0);b.lineTo(542,255);b.lineTo(398,255);b.closePath();b.fill();
+}else{
+ b.fillStyle='#a9c5d8';b.fillRect(390,160,270,24);b.fillStyle='#718aa1';b.fillRect(410,184,25,71);b.fillRect(605,184,25,71);b.fillStyle='#c8d7e4';b.fillRect(385,150,280,8);for(let r=0;r<9;r++){b.fillStyle='#6e8497';b.fillRect(395+r*32,125,4,25);b.fillStyle='#bdcbd8';b.fillRect(395+r*32,125,32,4)}
+}
 b.strokeStyle='#60708f';
 b.lineWidth=5;
 b.beginPath();
 b.moveTo(30,255);
-b.lineTo(910,255);
-b.stroke();
+b.lineTo(910,255);b.stroke();b.strokeStyle='#8c6f54';b.lineWidth=7;for(let sx=35;sx<910;sx+=28){b.beginPath();b.moveTo(sx,250);b.lineTo(sx,268);b.stroke()}
 b.fillStyle=st.scene==='桥'?'#36c5a6':'#59627e';
 b.fillRect(start,160,end-start,95);
 b.fillStyle='#fff';
@@ -591,7 +585,7 @@ b.font='14px system-ui';
 b.fillText('①车头上'+st.scene,start-35,130);
 b.fillText('②车身完全在'+st.scene,start+10,110);
 b.fillText('③车尾离开',end-20,130);
-arrow(x-40,105,V*5,'#ffb14e','v='+V+'m/s');
+arrow(b,x-40,105,V*5,'#ffb14e','v='+V+'m/s');
 let stage=p< L/total?'车头上'+st.scene:p< B/total?'车身完全在'+st.scene:'车尾离开';
 $('trainLenV').textContent=L+' m';
 $('bridgeLenV').textContent=B+' m';
@@ -599,7 +593,7 @@ $('trainSpeedV').textContent=V+' m/s';
 $('bridgeFx').textContent='总路程 = '+L+' + '+B+' = '+total+' m；通过时间 = '+dur.toFixed(1)+' s';
 $('bridgeNote').textContent='当前节点：'+stage+'（动画 '+Math.round(p*100)+'%）'
 }function carsDraw(){
-let a=+$('va').value,d=+$('vb').value,rel=st.mode==='相向错车'?a+d:Math.abs(a-d),q=clamp(st.t/5,0,1),same=st.mode==='同向追及';
+let a=+$('va').value,d=+$('vb').value,rel=st.mode==='相向错车'?a+d:Math.abs(a-d),q=clamp(st.t/8,0,1),same=st.mode==='同向追及';
 c.clearRect(0,0,940,350);
 c.fillStyle='#edf1ff';
 c.fillRect(0,0,940,350);
@@ -609,14 +603,14 @@ c.beginPath();
 c.moveTo(30,160);
 c.lineTo(910,160);
 c.stroke();
-let x1=same?90+q*350:90+q*360,x2=same?560+q*130:760-q*360;
+let x1=same?500+q*150:90+q*500,x2=same?100+q*500:760-q*500;
 if(st.ref==='甲车'){
 x2-=x1-90;
 x1=90
-}train(c,x1,120,'#5b8def','甲');
-train(c,x2,120,'#f4739b','乙');
-arrow(x1+25,220,a*7,'#5b8def','甲 '+a);
-arrow(x2+25,260,(same?d:-d)*7,'#f4739b','乙 '+d);
+}train(c,x1,120,'#5b8def','甲',1);
+train(c,x2,120,'#f4739b','乙',same?-1:-1);
+arrow(c,x1+25,220,a*7,'#5b8def','甲 '+a);
+arrow(c,x2+25,260,(same?d:-d)*7,'#f4739b','乙 '+d);
 c.fillStyle='#2b2b3a';
 c.font='14px system-ui';
 c.fillText(st.mode+'｜参照：'+st.ref,30,35);
