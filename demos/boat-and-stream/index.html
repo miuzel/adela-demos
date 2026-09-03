@@ -453,7 +453,7 @@ color:var(--muted)">岸上速度 = 船对水速度 + 水对岸速度</small>
 <section id="advanced" class="panel">
 <div class="card">
 <h2>🛟 进阶实验室：救生圈漂流相遇</h2>
-<p class="lead">两船相向，救生圈随水漂。切换参照系时用 680ms smoothstep 平滑过渡：在水系中救生圈“停”在原地。</p>
+<p class="lead">两船相向，救生圈随水漂。切换岸上 / 水上参照系观察：在水系中救生圈「停」在原地，相遇立即变得和静水一样简单。</p>
 <div class="controls">
 <div class="ctrl">
 <label>初始距离 d</label>
@@ -619,20 +619,36 @@ bctx.fillStyle='#60708f';
 bctx.font='14px system-ui';
 bctx.fillText('岸上坐标：向右为正　水流 →',28,30);
 let waterView=state.ref==='水上';
-for(let x=50+(waterView?-state.t*water*20:state.t*water*20)%90;x<920;x+=90){
+let leafShift=waterView?0:state.t*water*20;
+for(let x=50+leafShift%90;x<920;x+=90){
  bctx.fillStyle='#36c5a6';bctx.beginPath();bctx.arc(x,120,6,0,7);bctx.fill();
  bctx.fillStyle='#8bb26d';bctx.fillRect(x-3,68,6,45);
 }
-let net=waterView?boat:boat+water;let direction=state.basicDir;let travel=direction*net;let bx=direction>0?80+(state.t*net*25)%650:730-(state.t*net*25)%650;
+let direction=state.basicDir;
+// 船相对水的速度（带方向）：船头向右为 +v船，向左为 -v船。
+let boatSigned=direction*boat;
+// 相对岸的速度 = 船对水速度 + 水对岸速度。水上参照系里水静止，只剩船速。
+let netSigned=waterView?boatSigned:boatSigned+water;
+let netMag=Math.abs(netSigned);
+let bx=netSigned>=0?80+(state.t*netSigned*25)%650:730-(state.t*netMag*25)%650;
 drawBoat(bctx,bx,145,'#5b8def','船',direction);
-arrow(bctx,bx+55,205,direction*boat*13,'#9a7cf0','v船');
+arrow(bctx,bx+55,205,boatSigned*13,'#9a7cf0','v船');
 arrow(bctx,bx+55,245,water*13,'#36c5a6','v水');
-arrow(bctx,bx+55,285,direction*(state.ref==='水上'?boat:boat+water)*13,'#5b8def',state.ref==='水上'?'水系 v船':'岸上 v顺');
+arrow(bctx,bx+55,285,netSigned*13,'#5b8def',waterView?'水系 v船':(direction>0?'岸上 v顺':'岸上 v逆'));
 bctx.fillStyle='#17233d';
-bctx.fillText(state.ref==='水上'?'水上参照：漂浮物静止，船速为 v船':'岸上参照：船速为 v船+v水',28,345);
+bctx.fillText(waterView?'水上参照：漂浮物静止，水流速度为 0，船速 = v船':'岸上参照：水流向右，船相对岸速度 = v船 ± v水',28,345);
 $('boatV').textContent=boat.toFixed(1)+' m/s';
 $('waterV').textContent=water.toFixed(1)+' m/s';
-$('basicFx').innerHTML=state.ref==='水上'?'水系：v船对水 = '+boat.toFixed(1)+' m/s':'岸系：v顺 = '+(boat+water).toFixed(1)+' m/s，v逆 = '+(boat-water).toFixed(1)+' m/s'
+let fx;
+if(waterView){
+ fx='水系：v船对水 = '+boat.toFixed(1)+' m/s（方向由船头决定）';
+}else if(direction>0){
+ fx='岸系（顺流）：v顺 = v船 + v水 = '+boat.toFixed(1)+' + '+water.toFixed(1)+' = '+(boat+water).toFixed(1)+' m/s';
+}else{
+ let rev=boat-water;
+ fx='岸系（逆流）：v逆 = v船 − v水 = '+boat.toFixed(1)+' − '+water.toFixed(1)+' = '+rev.toFixed(1)+' m/s'+(rev<0?'（水速大于船速，船被推向右边）':'');
+}
+$('basicFx').innerHTML=fx;
 }function advDraw(){
 let d=+$('dist').value,s=+$('meetSpeed').value,w=+$('meetWater').value,meet=d/(2*s),p=clamp(state.t/meet,0,1),ref=state.advRef;
 actx.clearRect(0,0,940,350);

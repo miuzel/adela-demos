@@ -418,7 +418,7 @@ animation:none
 <section id="advanced" class="panel">
 <div class="card">
 <h2>🚆 进阶实验室：双车错车与追及</h2>
-<p class="lead">切换情形，观察两车坐标系平滑过渡（680ms smoothstep），理解速度和/差。</p>
+<p class="lead">切换「相向错车」与「同向追及」，从地面 / 甲车视角观察两车距离如何变化，理解相对速度的「和」与「差」。</p>
 <div class="controls">
 <div class="ctrl">
 <label>甲车速度</label>
@@ -603,12 +603,20 @@ c.beginPath();
 c.moveTo(30,160);
 c.lineTo(910,160);
 c.stroke();
-let x1=same?500+q*150:90+q*500,x2=same?100+q*500:760-q*500;
+let x1,x2;
+if(same){
+ // 同向追及：快车在后追赶慢车，两车都向右；间距按速度差缩短。
+ const chaseSpeed=Math.max(a,d),leadSpeed=Math.min(a,d),k=3;
+ const chaseX=90+chaseSpeed*k*8*q,leadX=460+leadSpeed*k*8*q;
+ if(a>=d){x1=chaseX;x2=leadX}else{x1=leadX;x2=chaseX}
+}else{
+ x1=90+q*500;x2=760-q*500;
+}
 if(st.ref==='甲车'){
 x2-=x1-90;
 x1=90
 }train(c,x1,120,'#5b8def','甲',1);
-train(c,x2,120,'#f4739b','乙',same?-1:-1);
+train(c,x2,120,'#f4739b','乙',same?1:-1);
 arrow(c,x1+25,220,a*7,'#5b8def','甲 '+a);
 arrow(c,x2+25,260,(same?d:-d)*7,'#f4739b','乙 '+d);
 c.fillStyle='#2b2b3a';
@@ -616,8 +624,8 @@ c.font='14px system-ui';
 c.fillText(st.mode+'｜参照：'+st.ref,30,35);
 $('vaV').textContent=a+' km/h';
 $('vbV').textContent=d+' km/h';
-$('carsFx').textContent='相对速度 = '+(st.mode==='相向错车'?a+' + '+d:a+' − '+d)+' = '+rel+' km/h';
-$('carsNote').textContent='通过时需要走过两车长度之和；动画展示两车距离变化。'
+$('carsFx').textContent='相对速度 = '+(st.mode==='相向错车'?a+' + '+d:'|'+a+' − '+d+'|')+' = '+rel+' km/h';
+$('carsNote').textContent=same?'同向追及：相对速度 = |v甲 − v乙| = '+rel+' km/h，快车从后方逐渐追上慢车。':'相向错车：相对速度 = v甲 + v乙 = '+rel+' km/h，两车相向而行、互相走过整个车身。'
 }function loop(now){
 let dt=st.last?Math.min((now-st.last)/1000,.05):0;
 st.last=now;
